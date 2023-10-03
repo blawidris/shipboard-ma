@@ -94,9 +94,14 @@ class ProjectsController extends Controller
             ->withTrashed()
             ->firstOrFail();
 
-        $this->authorize('view', $project);
+        $notification = Activity::where('status', 'unread')->get();
 
-        return Inertia::render('back/app/projects/show', [
+        $notification->map(function ($notice) {
+            $notice->datetime = Carbon::parse($notice->created_at)->diffForHumans();
+            return $notice;
+        });
+
+        $data = [
             'users'   => User::orderBy('name')->get()->map->only(['uuid', 'name', 'email', 'avatar_url', 'role']),
             'can'     => [
                 'update_project'  => auth()->user()->can('update', $project),
@@ -144,8 +149,20 @@ class ProjectsController extends Controller
                         })->values()
                     ];
                 })->values()
-            ]
-        ]);
+            ],
+            'projects' => $this->getUserProjects()
+        ];
+
+        if (auth()->user()->role === 2) {
+            $data['notification'] = [
+                'total_count' => $notification->count(),
+                'list' => $notification
+            ];
+        }
+
+        $this->authorize('view', $project);
+
+        return Inertia::render('back/app/projects/show', $data);
     }
 
     /**
@@ -324,5 +341,22 @@ class ProjectsController extends Controller
         if ($project->wasChanged('start_date') || $project->wasChanged('end_date')) {
             event(new ProjectTimelineChanged($project));
         }
+    }
+
+
+    protected function getUserProjects()
+    {
+
+        return Project::with('user', 'teamMembers')
+            ->where('user_id', auth()->user()->id)
+            ->accessible()
+            ->get()
+            ->transform(function ($project) {
+                return [
+                    'uuid'  => $project->uuid,
+                    'name'  => $project->name,
+                    'color' => $project->color,
+                ];
+            });
     }
 }

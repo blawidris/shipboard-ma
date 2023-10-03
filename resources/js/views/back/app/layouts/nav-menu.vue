@@ -152,6 +152,7 @@
             </div>
 
             <inertia-link :key="project.uuid" :href="route('app:projects.show', { project: project.uuid })"
+                :class="[route().current('app:dashboard') ? 'text-white bg-gray-900' : 'text-gray-300']"
                 class="group mb-1 flex items-center px-6 py-2 text-sm leading-6 text-gray-300 focus:outline-none focus:bg-gray-700 hover:text-white hover:bg-gray-700 transition ease-in-out duration-150"
                 v-for="project in $page.projects">
                 <div class="w-3 h-3 overflow-hidden rounded-full mr-3">

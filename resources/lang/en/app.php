@@ -57,6 +57,7 @@ return [
         'overdue'                      => 'Overdue',
         'visibility'                   => 'Visibility',
         'due_date'                     => 'Due Date',
+        'countdown'                     => 'Timer',
         'create-project'               => 'Create Project',
         'tasks-left'                   => 'Tasks Left',
         'days-left'                    => 'Days Left',

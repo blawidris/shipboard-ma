@@ -23,12 +23,14 @@
             </v-breadcrumb-layout>
 
             <!-- Project Header -->
-            <div class="container mx-auto px-4 sm:px-6 md:px-8 xl:px-8 py-4 mb-10">
-                <div class="bg-white px-5 py-8 rounded-md">
-                    <div class="blog">
+            <div class="container mx-auto px-4 sm:px-5 md:px-8 xl:px-8 py-4 mb-10">
+                <div class="bg-white px-5 py-8 rounded-xl">
+                    <!-- project information -->
+                    <!-- <span class="srn-only">Project information</span> -->
+                    <div class="block max-w-7xl">
 
-                        <div class="block sm:flex items-center gap-x-3">
-                            <h1 class="text-base md:text-2xl text-gray-900 font-medium">{{ project.name }}</h1>
+                        <div class="block sm:flex items-center gap-x-3 mb-2">
+                            <h1 class="text-xl md:text-2xl text-gray-900 font-medium">{{ project.name }}</h1>
                             <div class="inline-flex">
                                 <button class="inline text-center p-2 text-gray-600 hover:text-gray-900 focus:outline-none">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -48,9 +50,54 @@
                                 </button>
                             </div>
                         </div>
-                        <p class="text-gray-600">
+                        <p class="text-gray-500 font-normal text-sm">
                             {{ project.description }}
                         </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-4  mt-6 max-w-2xl">
+                        <div class="pb-4 md:border-r-2 md:border-gray-400 pr-4">
+                            <h3 class="text-sm text-gray-500">
+                                {{ $trans('labels.status') }}
+                            </h3>
+
+                        </div>
+
+                        <div class="pb-4 md:border-r-2 border-gray-400 pr-4">
+                            <h3 class="text-sm text-gray-500">
+                                {{ $trans('headings.total-tasks') }}
+                            </h3>
+                            <p class="text-gray-900 text-base font-semibold flex gap-x-1 mt-4 relative">
+                                <span>15</span>
+                                <span class="text-sm text-gray-400">/</span>
+                                <span>30</span>
+                            </p>
+                        </div>
+
+                        <div class="pb-4 md:border-r-2 border-gray-400 pr-4">
+                            <h3 class="text-sm text-gray-500">
+                                {{ $trans('labels.due_date') }}
+                            </h3>
+                            <p class="text-gray-900 text-base font-semibold">
+                                {{ dueDate }}
+                            </p>
+                        </div>
+
+                        <div class="pb-4 pr-4">
+                            <h3 class="text-sm text-gray-500">
+                                {{ $trans('labels.countdown') }}
+                            </h3>
+                            <p class="text-sm font-medium flex gap-x-1 mt-4 relative text-white">
+                                <span
+                                    class="py-0.5 px-1 bg-blue-600 rounded-md flex items-center justify-center shadow-sm">15</span>
+                                <span class="text-sm text-gray-400">:</span>
+                                <span
+                                    class="py-0.5 px-1 bg-blue-600 rounded-md flex items-center justify-center shadow-sm">30</span>
+                                <span class="text-sm text-gray-400">:</span>
+                                <span
+                                    class="py-0.5 px-1.5 bg-blue-600 rounded-md flex items-center justify-center shadow-sm">30</span>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -103,6 +150,12 @@ export default {
     metaInfo() {
         return {
             title: this.project.name
+        }
+    },
+
+    data() {
+        return {
+            dueDate: this.project.end_date
         }
     },
 
@@ -235,6 +288,7 @@ export default {
                 tasks: this.project.columns[columnIndex].tasks.map(task => task.uuid).reverse()
             });
         }
-    }
+    },
+
 }
 </script>
