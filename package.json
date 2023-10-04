@@ -38,6 +38,7 @@
         "vuedraggable": "^2.23.2"
     },
     "dependencies": {
+        "@vueuse/core": "^10.4.1",
         "formvalidation": "^0.6.2-dev",
         "vue-multiselect": "^2.1.7",
         "vue-toast-notification": "^1.0.1"

@@ -31,21 +31,17 @@
             </template>
 
             <template v-slot:content>
-                <ul class="dropdown-menu flex flex-col w-80 px-1">
+                <ul class="dropdown-menu flex flex-col w-80 px-1 overflow-y-auto max-h-60" ref="listEl">
 
                     <li class="dropdown-item inline-flex flex-col py-2.5 px-3" v-if="$page.notification.list.length == 0">
                         <div class="inline-flex items-start gap-2">
-                            <div class="user-img flex-shrink-0">
-                                <img src="https://png.pngtree.com/png-vector/20220709/ourmid/pngtree-businessman-user-avatar-wearing-suit-with-red-tie-png-image_5809521.png"
-                                    class="rounded-full w-6 h-6 bg-clip-content">
-                            </div>
                             <div class="activity-perform text-sm font-normal">
                                 No recent activity
                             </div>
                         </div>
                     </li>
 
-                    <div class="" v-else>
+                    <div v-else>
                         <li class="dropdown-item inline-flex flex-col py-2.5 px-3" v-for="noty in $page.notification.list"
                             :key="noty.id" @click="updateRead(noty.id)">
 
@@ -133,20 +129,37 @@
 </template>
 
 
-<script setup>
+<script>
 import VDropdown from '@/components/dropdown'
 
-defineProps(['pageTitle'])
+export default {
+    props: {
+        pageTitle: String
+    },
 
+    components: {
+        VDropdown
+    },
 
-function updateRead(notificationId) {
-    axios.get(route('app:project.notification.read', {
-        id: notificationId,
-    })).then(response => {
-        // console.log(response.data.project_uuid, response.data)
-        location.href = '/app/projects/' + response.data.project_uuid
-    });
+    data() {
+        return {
+            notifyList: this.$page.notification.list
+        }
+    },
+
+    methods: {
+        updateRead(notificationId) {
+            axios.get(route('app:project.notification.read', {
+                id: notificationId,
+            })).then(response => {
+                // console.log(response.data.project_uuid, response.data)
+                location.href = '/app/projects/' + response.data.project_uuid
+            });
+        }
+    },
+    mounted() {
+        console.log(notifyList)
+    }
 }
-
 
 </script>
