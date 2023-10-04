@@ -271,7 +271,7 @@ Route::group(['namespace' => 'Web\Back\App', 'prefix' => 'app', 'as' => 'app:'],
     Route::get('settings/users', 'Settings\UsersController@index')->name('users.index');
     Route::post('settings/users', 'Settings\UsersController@store')->name('users.store');
     Route::put('settings/users/{user}', 'Settings\UsersController@update')->name('users.update');
-    Route::get('settings/users/roles', 'Settings/UsersController@role')->name('users.roles');
+    // Route::get('settings/users/roles', 'Settings/UsersController@roles')->name('users.roles');
     /**
      * Subscription
      */

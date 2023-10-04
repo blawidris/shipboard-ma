@@ -17,10 +17,10 @@
             {{ $trans('labels.billing-information') }}
         </inertia-link>
 
-        <inertia-link :href="route('app:users.roles')" :class="{ 'bg-white': route().current('app:users.roles') }"
+        <!-- <inertia-link :href="route('app:users.roles')" :class="{ 'bg-white': route().current('app:users.roles') }"
             class="flex items-center px-4 py-2 rounded-lg text-sm mb-1 hover:bg-white font-semibold transition duration-150">
             {{ $trans('labels.user-role-permission') }}
-        </inertia-link>
+        </inertia-link> -->
 
     </nav>
 </template>

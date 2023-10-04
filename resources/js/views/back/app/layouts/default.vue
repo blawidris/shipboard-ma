@@ -32,7 +32,7 @@
 
         <div class="flex flex-col w-0 flex-1 overflow-hidden">
             <div class="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 flex items-center justify-between">
-                <div class="flex-shrink-0">
+                <div class="flex-shrink-0 pl-6">
                     <h2 class="text-base font-medium text-gray-900">
                         {{ pageTitle }}
                     </h2>

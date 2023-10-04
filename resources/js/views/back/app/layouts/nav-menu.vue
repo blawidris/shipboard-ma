@@ -6,7 +6,7 @@
             </inertia-link>
         </div>
 
-        <div class="flex-shrink-0 flex px-6 pt-1 md:hidden">
+        <div class="flex-shrink-0 flex px-6 pt-1">
             <inertia-link :href="route('app:profile.edit')" class="flex-shrink-0 group block focus:outline-none">
                 <div class="flex items-center">
                     <div>
@@ -49,17 +49,17 @@
             <inertia-link :href="route('app:projects.index')"
                 :class="[route().current('app:projects.index') ? 'text-white bg-gray-900' : 'text-gray-300']"
                 class="group mb-1 flex items-center px-6 py-2 text-sm leading-6 focus:outline-none focus:bg-gray-700 hover:text-white hover:bg-gray-700 transition ease-in-out duration-150">
-                <!-- <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current mr-3">
+                <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current mr-3">
                     <path d="M10 1l10 6-10 6L0 7l10-6zm6.67 10L20 13l-10 6-10-6 3.33-2L10 15l6.67-4z"></path>
-                </svg> -->
+                </svg>
 
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                <!-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-4 h-4 mr-3">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                </svg>
+                </svg> -->
 
-                {{ $trans('labels.messages') }}
+                {{ $trans('labels.projects') }}
             </inertia-link>
 
             <!-- <inertia-link :href="route('app:projects.index')"
@@ -75,22 +75,22 @@
             <inertia-link :href="route('app:tasks.index')"
                 :class="[route().current('app:tasks.index') ? 'text-white bg-gray-900' : 'text-gray-300']"
                 class="group mb-1 flex items-center px-6 py-2 text-sm leading-6 focus:outline-none focus:bg-gray-700 hover:text-white hover:bg-gray-700 transition ease-in-out duration-150">
-                <!-- <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-3 text-white">
+                <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-3 fill-current text-white">
                     <path
                         d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM6.7 9.29L9 11.6l4.3-4.3 1.4 1.42L9 14.4l-3.7-3.7 1.4-1.42z">
                     </path>
-                </svg> -->
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                </svg>
+                <!-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-4 h-4 mr-3">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
-                </svg>
+                </svg> -->
 
 
                 {{ $trans('labels.my-tasks') }}
             </inertia-link>
 
-            <!-- <inertia-link :href="route('app:calendar.index')"
+            <inertia-link :href="route('app:calendar.index')"
                 :class="[route().current('app:calendar.index') ? 'text-white bg-gray-900' : 'text-gray-300']"
                 class="group mb-1 flex items-center px-6 py-2 text-sm leading-6 focus:outline-none focus:bg-gray-700 hover:text-white hover:bg-gray-700 transition ease-in-out duration-150">
                 <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current mr-3">
@@ -100,9 +100,10 @@
                 </svg>
 
                 {{ $trans('labels.calendar') }}
-            </inertia-link> -->
+            </inertia-link>
 
-            <inertia-link :href="route('app:users.index')"
+
+            <inertia-link :href="route('app:users.index')" v-if="$page.user.role !== 3"
                 :class="[route().current('app:users.index') ? 'text-white bg-gray-900' : 'text-gray-300']"
                 class="group mb-1 flex items-center px-6 py-2 text-sm leading-6 focus:outline-none focus:bg-gray-700 hover:text-white hover:bg-gray-700 transition ease-in-out duration-150">
                 <!-- <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current mr-3">
@@ -120,7 +121,8 @@
                 {{ $trans('labels.members') }}
             </inertia-link>
 
-            <inertia-link :href="route('app:users.index')"
+
+            <!-- <inertia-link :href="route('app:users.index')"
                 :class="[route().current('app:users.index') ? 'text-white bg-gray-900' : 'text-gray-300']"
                 class="group mb-1 flex items-center px-6 py-2 text-sm leading-6 focus:outline-none focus:bg-gray-700 hover:text-white hover:bg-gray-700 transition ease-in-out duration-150">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -133,10 +135,10 @@
 
 
                 {{ $trans('labels.settings') }}
-            </inertia-link>
+            </inertia-link> -->
         </nav>
 
-        <nav class="block mt-3 bg-gray-800 flex-wrap">
+        <!-- <nav class="block mt-3 bg-gray-800 flex-wrap">
             <div class="px-6 mb-2 flex items-center justify-between border-t border-gray-100 py-3">
                 <inertia-link :href="route('app:projects.index')" class="text-sm text-gray-300 font-medium capitalize">
                     {{ $trans('labels.projects') }}
@@ -160,10 +162,10 @@
                 </div>
                 {{ project.name }}
             </inertia-link>
-        </nav>
+        </nav> -->
 
         <nav class="block mt-3 bg-gray-800">
-            <div class="px-6 mb-2 border-t border-gray-100 py-3">
+            <div class="px-4 py-3">
                 <span class="text-sm text-gray-500 font-semibold">
                     {{ $trans('labels.favorites') }}
                 </span>
@@ -179,8 +181,8 @@
             </inertia-link>
         </nav>
 
-        <!-- <nav>
-            <inertia-link :href="route('app:users.index')"
+        <nav class="mt-auto">
+            <inertia-link :href="route('app:users.index')" v-if="$page.user.role !== 3"
                 class="group flex items-center px-6 py-2 text-sm leading-6 text-gray-300 focus:outline-none focus:bg-gray-700 hover:text-white hover:bg-gray-700 transition ease-in-out duration-150">
                 <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current mr-3">
                     <path
@@ -201,6 +203,6 @@
 
                 {{ $trans('labels.logout') }}
             </a>
-        </nav> -->
+        </nav>
     </div>
 </template>

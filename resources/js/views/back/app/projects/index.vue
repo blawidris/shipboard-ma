@@ -91,6 +91,8 @@
 
                 <div class="bg-white shadow overflow-hidden rounded-md" v-if="$page.projects.data.length">
                     <ul>
+
+                        <!-- {{ $page.projects.data }} -->
                         <li class="border-b border-gray-100 last:border-0" v-for="project in $page.projects.data">
                             <inertia-link :href="route('app:projects.show', project.uuid)"
                                 class="block hover:bg-gray-50 focus:outline-none focus:bg-gray-50 transition duration-150 ease-in-out">
@@ -190,6 +192,7 @@
                                 </div>
                             </inertia-link>
                         </li>
+
                     </ul>
 
                     <v-pagination :links="$page.projects.links"></v-pagination>

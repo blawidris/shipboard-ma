@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $completedTasksByMonth = $this->getCompletedTasksByMonth();
         $completedTasksByDay = $this->getCompletedTasksByDay();
         $notification = Activity::where('status', 'unread')->get();
-        $projects = $this->getUserProjects();
+        // $projects = $this->getUserProjects();
 
         $notification->map(function ($notice) {
             $notice->datetime = Carbon::parse($notice->created_at)->diffForHumans();
@@ -52,7 +52,7 @@ class DashboardController extends Controller
                 'total_count' => 0,
                 'list' => []
             ],
-            'projects' => $projects,
+            // 'projects' => $projects,
             'tasks_by_month'        => $completedTasksByMonth,
             'tasks_by_month_count'  => collect($completedTasksByMonth)->sum(),
             'tasks_by_day'          => $completedTasksByDay,

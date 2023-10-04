@@ -1,8 +1,95 @@
 <template>
-    <v-app-default-layout :pageTitle="$trans('labels.projects')">
-        <template #header>
-            <!-- <h1 class="text-2xl font-semibold text-gray-900">{{ project.name }}</h1> -->
-            <v-nav-header :pageTitle="$trans('labels.projects')"></v-nav-header>
+    <v-app-default-layout>
+        <template v-slot:header>
+            <h1 class="text-2xl font-semibold text-gray-900">{{ project.name }}</h1>
+
+            <div class="ml-auto">
+                <v-dropdown>
+                    <template v-slot:button>
+                        <button
+                            class="flex items-center p-1 text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M10 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0-6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4z">
+                                </path>
+                            </svg>
+                        </button>
+                    </template>
+
+                    <template v-slot:content>
+                        <div class="w-48 rounded-md bg-white shadow-xs">
+                            <div class="py-1">
+                                <a @click.prevent="showEditProjectModal()" href="#"
+                                    class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
+                                    v-if="$page.can.update_project">
+                                    {{ $trans('labels.edit') }}
+                                </a>
+
+                                <inertia-link :href="route('app:favorite-projects.destroy', { project: project.uuid })"
+                                    class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
+                                    method="delete" v-if="project.is_favorite">
+                                    {{ $trans('labels.remove-favorite') }}
+                                </inertia-link>
+
+                                <inertia-link :data="{ project: project.uuid }" :href="route('app:favorite-projects.store')"
+                                    class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
+                                    method="post" v-else-if="project.status !== 'archived'">
+                                    {{ $trans('labels.add-favorite') }}
+                                </inertia-link>
+
+                                <inertia-link :href="route('app:projects.complete.destroy', { project: project.uuid })"
+                                    class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
+                                    method="delete" v-if="project.is_completed && project.status !== 'archived'">
+                                    {{ $trans('labels.mark-as-incomplete') }}
+                                </inertia-link>
+
+                                <inertia-link :href="route('app:projects.complete.store', { project: project.uuid })"
+                                    class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
+                                    method="post" v-else-if="!project.is_completed && project.status !== 'archived'">
+                                    {{ $trans('labels.mark-as-completed') }}
+                                </inertia-link>
+
+                                <inertia-link :href="route('app:projects.complete.approve', { project: project.uuid })"
+                                    class="block px-4 py-2 text-sm leading-5     text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
+                                    method="post" v-if="project.is_completed && project.is_approved != '1'">
+                                    {{ $trans('labels.approve') }}
+                                </inertia-link>
+
+                                <inertia-link :href="route('app:projects.complete.unapprove', { project: project.uuid })"
+                                    class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
+                                    method="post" v-else-if="project.is_completed && project.is_approved == '1'">
+                                    {{ $trans('labels.unapprove') }}
+                                </inertia-link>
+
+                                <inertia-link :href="route('app:project.watchers.destroy', { project: project.uuid })"
+                                    class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
+                                    method="delete" v-if="project.is_watched">
+                                    {{ $trans('labels.stop-watching') }}
+                                </inertia-link>
+
+                                <inertia-link :href="route('app:project.watchers.store', { project: project.uuid })"
+                                    class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
+                                    method="post" v-else>
+                                    {{ $trans('labels.watch') }}
+                                </inertia-link>
+
+                                <a @click.prevent="showDeleteProjectModal()" href="#"
+                                    class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
+                                    v-if="$page.can.delete_project || $page.can.archive_project">
+                                    <span v-if="project.status === 'archived'">{{ $trans('labels.delete') }}</span>
+                                    <span v-else>{{ $trans('labels.archive') }}</span>
+                                </a>
+
+                                <a @click.prevent="showRestoreProjectModal()"
+                                    class="flex items-center px-4 py-2 text-sm leading-tight hover:bg-gray-200" href="#"
+                                    v-if="($page.can.delete_project || $page.can.archive_project) && project.is_archived">
+                                    {{ $trans('labels.restore') }}
+                                </a>
+                            </div>
+                        </div>
+                    </template>
+                </v-dropdown>
+            </div>
         </template>
 
         <div class="px-6" v-if="$page.flash">
@@ -16,93 +103,6 @@
         </div>
 
         <template>
-
-            <!-- Breadcrumb -->
-            <v-breadcrumb-layout class="my-6 px-9  container mx-auto">
-                <v-breadcrumb-item :lastItem="true" :title="project.name" />
-            </v-breadcrumb-layout>
-
-            <!-- Project Header -->
-            <div class="container mx-auto px-4 sm:px-5 md:px-8 xl:px-8 py-4 mb-10">
-                <div class="bg-white px-5 py-8 rounded-xl">
-                    <!-- project information -->
-                    <!-- <span class="srn-only">Project information</span> -->
-                    <div class="block max-w-7xl">
-
-                        <div class="block sm:flex items-center gap-x-3 mb-2">
-                            <h1 class="text-xl md:text-2xl text-gray-900 font-medium">{{ project.name }}</h1>
-                            <div class="inline-flex">
-                                <button class="inline text-center p-2 text-gray-600 hover:text-gray-900 focus:outline-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                    </svg>
-                                </button>
-
-                                <button class="inline text-center p-2 text-gray-600 hover:text-gray-900 focus:outline-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-                                    </svg>
-
-                                </button>
-                            </div>
-                        </div>
-                        <p class="text-gray-500 font-normal text-sm">
-                            {{ project.description }}
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-4  mt-6 max-w-2xl">
-                        <div class="pb-4 md:border-r-2 md:border-gray-400 pr-4">
-                            <h3 class="text-sm text-gray-500">
-                                {{ $trans('labels.status') }}
-                            </h3>
-
-                        </div>
-
-                        <div class="pb-4 md:border-r-2 border-gray-400 pr-4">
-                            <h3 class="text-sm text-gray-500">
-                                {{ $trans('headings.total-tasks') }}
-                            </h3>
-                            <p class="text-gray-900 text-base font-semibold flex gap-x-1 mt-4 relative">
-                                <span>15</span>
-                                <span class="text-sm text-gray-400">/</span>
-                                <span>30</span>
-                            </p>
-                        </div>
-
-                        <div class="pb-4 md:border-r-2 border-gray-400 pr-4">
-                            <h3 class="text-sm text-gray-500">
-                                {{ $trans('labels.due_date') }}
-                            </h3>
-                            <p class="text-gray-900 text-base font-semibold">
-                                {{ dueDate }}
-                            </p>
-                        </div>
-
-                        <div class="pb-4 pr-4">
-                            <h3 class="text-sm text-gray-500">
-                                {{ $trans('labels.countdown') }}
-                            </h3>
-                            <p class="text-sm font-medium flex gap-x-1 mt-4 relative text-white">
-                                <span
-                                    class="py-0.5 px-1 bg-blue-600 rounded-md flex items-center justify-center shadow-sm">15</span>
-                                <span class="text-sm text-gray-400">:</span>
-                                <span
-                                    class="py-0.5 px-1 bg-blue-600 rounded-md flex items-center justify-center shadow-sm">30</span>
-                                <span class="text-sm text-gray-400">:</span>
-                                <span
-                                    class="py-0.5 px-1.5 bg-blue-600 rounded-md flex items-center justify-center shadow-sm">30</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
             <v-draggable class="flex flex-1 max-h-screen h-full overflow-x-auto px-6 pb-3 mx-2"
                 ghost-class="draggable-ghost" group="columns" handle=".column" v-model="project.columns"
                 v-bind="{ fallbackTolerance: 7 }" @end="onColumnSortChange">
@@ -142,9 +142,6 @@ import VAddColumnModal from '@/views/back/app/projects/modal-column-add'
 import VEditProjectModal from '@/views/back/app/projects/modal-project-edit'
 import VDropdown from '@/components/dropdown'
 import VAlert from '@/components/alert'
-import VNavHeader from '@/views/back/app/layouts/nav-header';
-import VBreadcrumbLayout from '@/components/breadcrumb/breadcrumb-layout'
-import VBreadcrumbItem from '@/components/breadcrumb/breadcrumb-item'
 
 export default {
     metaInfo() {
@@ -153,21 +150,12 @@ export default {
         }
     },
 
-    data() {
-        return {
-            dueDate: this.project.end_date
-        }
-    },
-
     components: {
         VDraggable,
         VAppDefaultLayout,
         VCardProjectColumn,
         VDropdown,
-        VAlert,
-        VNavHeader,
-        VBreadcrumbItem,
-        VBreadcrumbLayout
+        VAlert
     },
 
     props: {
@@ -288,7 +276,6 @@ export default {
                 tasks: this.project.columns[columnIndex].tasks.map(task => task.uuid).reverse()
             });
         }
-    },
-
+    }
 }
 </script>

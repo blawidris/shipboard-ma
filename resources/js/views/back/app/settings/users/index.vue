@@ -1,20 +1,9 @@
 <template>
-    <v-app-default-layout>
+    <v-app-default-layout :pageTitle="$trans('headings.team-members')">
         <template v-slot:header>
-            <h1 class="text-2xl font-semibold text-gray-900">{{ $trans('headings.team-members') }}</h1>
+            <!-- <h1 class="text-2xl font-semibold text-gray-900">{{ $trans('headings.team-members') }}</h1> -->
+            <v-nav-header :pageTitle="$trans('headings.team-members')" />
 
-            <!-- notification -->
-            <div class="ml-auto relative mr-10">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                </svg>
-                <span
-                    class="rounded rounded-pill absolute text-xs text-center bg-gray-300 px-1 py-1.2 font-medium top-0.5 right-0 -mt-3">
-                    0
-                </span>
-            </div>
         </template>
 
         <template>
@@ -103,6 +92,8 @@ import VNavMenu from '@/views/back/app/settings/nav-menu'
 import VCreateUserModal from '@/views/back/app/settings/users/modal-user-create'
 import VEditUserModal from '@/views/back/app/settings/users/modal-user-edit'
 import VAlert from '@/components/alert'
+import VNavHeader from '@/views/back/app/layouts/nav-header';
+
 
 export default {
     metaInfo() {
@@ -114,7 +105,8 @@ export default {
     components: {
         VAppDefaultLayout,
         VNavMenu,
-        VAlert
+        VAlert,
+        VNavHeader
     },
 
     methods: {
