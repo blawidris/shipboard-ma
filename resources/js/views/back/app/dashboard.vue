@@ -231,14 +231,14 @@ export default {
     },
 
     methods: {
-        updateRead(notificationId) {
-            axios.get(route('app:project.notification.read', {
-                id: notificationId,
-            })).then(response => {
-                // console.log(response.data.project_uuid, response.data)
-                location.href = '/app/projects/' + response.data.project_uuid
-            });
-        }
+        // updateRead(notificationId) {
+        //     axios.get(route('app:project.notification.read', {
+        //         id: notificationId,
+        //     })).then(response => {
+        //         // console.log(response.data.project_uuid, response.data)
+        //         location.href = '/app/projects/' + response.data.project_uuid
+        //     });
+        // }
     },
 
     mounted() {

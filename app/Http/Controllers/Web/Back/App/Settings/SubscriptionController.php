@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Web\Back\App\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Activity;
 use App\Models\Plan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -28,7 +30,15 @@ class SubscriptionController extends Controller
     {
         $subscription = tenant()->defaultSubscription();
 
-        return Inertia::render('back/app/settings/subscription/index', [
+        $notification = Activity::where('status', 'unread')->get();
+
+        $notification->map(function ($notice) {
+            $notice->datetime = Carbon::parse($notice->created_at)->diffForHumans();
+            return $notice;
+        });
+
+
+        $data = [
             'plans'                  => $this->getAvailablePlans(),
             'token'                  => tenant()->generateClientToken(),
             'paymentMethods'         => tenant()->paymentMethods(),
@@ -47,7 +57,22 @@ class SubscriptionController extends Controller
                     'name' => $subscription && $subscription->valid() ? $subscription->plan->name : null,
                 ]
             ],
-        ]);
+            'notification'        => [
+                'total_count' => 0,
+                'list' => []
+            ],
+        ];
+
+        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email']);
+
+        if (auth()->user()->role !== 3 || auth()->user()->isWatcher) {
+            $data['notification'] = [
+                'total_count' => $notification->count(),
+                'list' => $notification
+            ];
+        }
+
+        return Inertia::render('back/app/settings/subscription/index', $data);
     }
 
     /**

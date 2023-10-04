@@ -102,7 +102,7 @@
                 {{ $trans('labels.calendar') }}
             </inertia-link>
 
-
+            {{ $page.user.role }}
             <inertia-link :href="route('app:users.index')" v-if="$page.user.role !== 3"
                 :class="[route().current('app:users.index') ? 'text-white bg-gray-900' : 'text-gray-300']"
                 class="group mb-1 flex items-center px-6 py-2 text-sm leading-6 focus:outline-none focus:bg-gray-700 hover:text-white hover:bg-gray-700 transition ease-in-out duration-150">
@@ -206,3 +206,4 @@
         </nav>
     </div>
 </template>
+

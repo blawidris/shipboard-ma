@@ -108,6 +108,10 @@ class ProjectsController extends Controller
                 'archive_project' => auth()->user()->can('delete', $project),
                 'delete_project'  => auth()->user()->can('forceDelete', $project)
             ],
+            'notification'        => [
+                'total_count' => 0,
+                'list' => []
+            ],
             'project' => [
                 'uuid'         => $project->uuid,
                 'name'         => $project->name,
@@ -150,10 +154,14 @@ class ProjectsController extends Controller
                     ];
                 })->values()
             ],
-            'projects' => $this->getUserProjects()
+            'projects' => $this->getUserProjects(),
+            'notification'        => [
+                'total_count' => 0,
+                'list' => []
+            ],
         ];
 
-        if (auth()->user()->role === 2) {
+        if (auth()->user()->role !== 3 || auth()->user()->isWatcher) {
             $data['notification'] = [
                 'total_count' => $notification->count(),
                 'list' => $notification

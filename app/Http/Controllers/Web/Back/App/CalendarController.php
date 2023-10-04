@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Web\Back\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\Activity;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 
 class CalendarController extends Controller
 {
@@ -24,7 +26,8 @@ class CalendarController extends Controller
      */
     public function index()
     {
-        return Inertia('back/app/calendar/index', [
+
+        $data = [
             'users'  => User::orderBy('name')->get()->map->only(['uuid', 'name', 'avatar_url']),
             'events' => auth()->user()->tasks()
                 ->mainTasks()
@@ -44,7 +47,30 @@ class CalendarController extends Controller
                         'user_uuid'    => optional($task->user)->uuid,
                         'priority'     => $task->priority,
                     ];
-                })
-        ]);
+                }),
+            'notification'        => [
+                'total_count' => 0,
+                'list' => []
+            ],
+        ];
+
+        $notification = Activity::where('status', 'unread')->get();
+
+        $notification->map(function ($notice) {
+            $notice->datetime = Carbon::parse($notice->created_at)->diffForHumans();
+            return $notice;
+        });
+
+        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email']);
+
+        if (auth()->user()->role !== 3 || auth()->user()->isWatcher) {
+            $data['notification'] = [
+                'total_count' => $notification->count(),
+                'list' => $notification
+            ];
+        }
+
+
+        return Inertia('back/app/calendar/index', $data);
     }
 }

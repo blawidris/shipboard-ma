@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Web\Back\App\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Activity;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -28,9 +30,32 @@ class UsersController extends Controller
      */
     public function index()
     {
-        return Inertia::render('back/app/settings/users/index', [
+
+        $data = [
             'users' => User::orderBy('name')->get(),
-        ]);
+            'notification'        => [
+                'total_count' => 0,
+                'list' => []
+            ],
+        ];
+
+        $notification = Activity::where('status', 'unread')->get();
+
+        $notification->map(function ($notice) {
+            $notice->datetime = Carbon::parse($notice->created_at)->diffForHumans();
+            return $notice;
+        });
+
+        if (auth()->user()->role !== 3 || auth()->user()->isWatcher) {
+            $data['notification'] = [
+                'total_count' => $notification->count(),
+                'list' => $notification
+            ];
+        }
+
+        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email']);
+
+        return Inertia::render('back/app/settings/users/index', $data);
     }
 
     /**

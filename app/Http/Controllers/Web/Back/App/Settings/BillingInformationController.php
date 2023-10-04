@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Web\Back\App\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Activity;
 use App\Support\Country;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 
 class BillingInformationController extends Controller
@@ -26,7 +28,16 @@ class BillingInformationController extends Controller
      */
     public function edit()
     {
-        return Inertia::render('back/app/settings/billing-information/edit', [
+
+        $notification = Activity::where('status', 'unread')->get();
+
+        $notification->map(function ($notice) {
+            $notice->datetime = Carbon::parse($notice->created_at)->diffForHumans();
+            return $notice;
+        });
+
+
+        $data = [
             'countries' => Country::all(),
             'tenant'    => [
                 'name'          => tenant()->name,
@@ -37,8 +48,23 @@ class BillingInformationController extends Controller
                 'country'       => tenant()->country,
                 'state'         => tenant()->state,
                 'postal_code'   => tenant()->postal_code,
-            ]
-        ]);
+            ],
+            'notification'        => [
+                'total_count' => 0,
+                'list' => []
+            ],
+        ];
+
+        if (auth()->user()->role !== 2 || auth()->user()->isWatcher) {
+            $data['notification'] = [
+                'total_count' => $notification->count(),
+                'list' => $notification
+            ];
+        }
+
+        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email']);
+
+        return Inertia::render('back/app/settings/billing-information/edit', $data);
     }
 
     /**
