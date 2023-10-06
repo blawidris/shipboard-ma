@@ -119,6 +119,8 @@ export default {
                 uuid: user.uuid,
                 name: user.name,
                 email: user.email,
+                email: user.department,
+                email: user.phone,
                 role: user.role
             })
         }
