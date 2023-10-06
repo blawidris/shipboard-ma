@@ -78,9 +78,9 @@ class UsersController extends Controller
         ]);
 
         User::create([
-            'name'      => $request->input('name'),
-            'email'     => $request->input('email'),
-            'password'  => bcrypt($request->input('password')),
+            'name'        => $request->input('name'),
+            'email'       => $request->input('email'),
+            'password'    => bcrypt($request->input('password')),
             'department'  => bcrypt($request->input('department')),
             'phone'  => bcrypt($request->input('phone')),
             'role'      => $request->input('role') === 'admin' ? User::ROLE_TENANT_OWNER : User::ROLE_TENANT_USER,

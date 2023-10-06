@@ -21,13 +21,14 @@
                 <div class="form-group mb-6">
                     <label class="form-label">{{ $trans('labels.department') }}</label>
                     <input class="form-input" v-model="form.department">
-                    <span class="invalid-feedback" v-if="$page.errors.has('name')">{{ $page.errors.first('name') }}</span>
+                    <span class="invalid-feedback" v-if="$page.errors.has('name')">{{ $page.errors.first('department')
+                    }}</span>
                 </div>
 
                 <div class="form-group mb-6">
                     <label class="form-label">{{ $trans('labels.phone') }}</label>
                     <input class="form-input" v-model="form.phone">
-                    <span class="invalid-feedback" v-if="$page.errors.has('name')">{{ $page.errors.first('name') }}</span>
+                    <span class="invalid-feedback" v-if="$page.errors.has('name')">{{ $page.errors.first('phone') }}</span>
                 </div>
 
                 <div class="form-group mb-6">
