@@ -122,7 +122,7 @@ class ProjectTasksController extends Controller
 
         if (auth()->user()->role !== 2) {
             return session()->flash('message', 'You are not authorize to approve this project');
-        }   
+        }
 
         $task->update([
             'is_approved' => 1
@@ -136,11 +136,11 @@ class ProjectTasksController extends Controller
 
         $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
 
-        if ($projectWatcher) {
-            foreach ($projectWatcher as $watcher) {
-                Mail::send(new ProjectTaskMail($activityLog, $watcher));
-            }
-        }
+        // if ($projectWatcher) {
+        //     foreach ($projectWatcher as $watcher) {
+        //         Mail::send(new ProjectTaskMail($activityLog, $watcher));
+        //     }
+        // }
 
         return back();
     }
@@ -204,19 +204,19 @@ class ProjectTasksController extends Controller
 
         $task->delete();
 
-        $activityLog = Activity::create([
-            'project_id' => $task->column->project_id,
-            'user_id' => auth()->user()->id,
-            'comment' => auth()->user()->name . " has deleted $task->content task"
-        ]);
+        // $activityLog = Activity::create([
+        //     'project_id' => $task->column->project_id,
+        //     'user_id' => auth()->user()->id,
+        //     'comment' => auth()->user()->name . " has deleted $task->content task"
+        // ]);
 
-        $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
+        // $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
 
-        if ($projectWatcher) {
-            foreach ($projectWatcher as $watcher) {
-                Mail::send(new ProjectTaskMail($activityLog, $watcher));
-            }
-        }
+        // if ($projectWatcher) {
+        //     foreach ($projectWatcher as $watcher) {
+        //         Mail::send(new ProjectTaskMail($activityLog, $watcher));
+        //     }
+        // }
 
         return back();
     }
@@ -237,19 +237,19 @@ class ProjectTasksController extends Controller
                 User::where('uuid', $request->input('user_uuid'))->firstOrFail()
             );
 
-            $activityLog = Activity::create([
-                'project_id' => $task->column->project_id,
-                'user_id' => auth()->user()->id,
-                'comment' => "New user has been assign to {$task->content} task"
-            ]);
+            // $activityLog = Activity::create([
+            //     'project_id' => $task->column->project_id,
+            //     'user_id' => auth()->user()->id,
+            //     'comment' => "New user has been assign to {$task->content} task"
+            // ]);
 
-            $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
+            // $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
 
-            if ($projectWatcher) {
-                foreach ($projectWatcher as $watcher) {
-                    Mail::send(new ProjectTaskMail($activityLog, $watcher));
-                }
-            }
+            // if ($projectWatcher) {
+            //     foreach ($projectWatcher as $watcher) {
+            //         Mail::send(new ProjectTaskMail($activityLog, $watcher));
+            //     }
+            // }
 
             return $assignedTo;
         }
@@ -271,22 +271,22 @@ class ProjectTasksController extends Controller
     {
         if ($request->input('is_completed')) {
 
-            if (auth()->user()->role === 1) {
+            // if (auth()->user()->role === 1) {
 
-                $activityLog = Activity::create([
-                    'project_id' => $task->column->project_id,
-                    'user_id' => auth()->user()->id,
-                    'comment' => auth()->user()->name . " has completed $task->content task"
-                ]);
-            }
+            //     $activityLog = Activity::create([
+            //         'project_id' => $task->column->project_id,
+            //         'user_id' => auth()->user()->id,
+            //         'comment' => auth()->user()->name . " has completed $task->content task"
+            //     ]);
+            // }
 
-            $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
+            // $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
 
-            if ($projectWatcher) {
-                foreach ($projectWatcher as $watcher) {
-                    Mail::send(new ProjectTaskMail($activityLog, $watcher));
-                }
-            }
+            // if ($projectWatcher) {
+            //     foreach ($projectWatcher as $watcher) {
+            //         Mail::send(new ProjectTaskMail($activityLog, $watcher));
+            //     }
+            // }
             return $task->markAsCompleted();
         }
 

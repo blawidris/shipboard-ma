@@ -31,7 +31,7 @@ class TasksController extends Controller
     public function index(TaskFilter $filters)
     {
 
-        $notification = Activity::where('status', 'unread')->get();
+        $notification = Activity::where('status', 'unread')->orderBy('created_at', 'desc')->get();
 
         $notification->map(function ($notice) {
             $notice->datetime = Carbon::parse($notice->created_at)->diffForHumans();

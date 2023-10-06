@@ -15,9 +15,9 @@ class AddIsReadAtColumnToActivities extends Migration
     {
         Schema::table('activities', function (Blueprint $table) {
             $table->timestamp('read_at')->nullable();
-            $table->bigInteger('user_id')->unsigned()->nullable();
+            // $table->bigInteger('user_id')->unsigned()->nullable();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

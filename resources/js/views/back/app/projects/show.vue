@@ -21,7 +21,7 @@
                             <div class="py-1">
                                 <a @click.prevent="showEditProjectModal()" href="#"
                                     class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
-                                    v-if="$page.can.update_project">
+                                    v-if="$page.can.update_project && $page.user.role !== 3">
                                     {{ $trans('labels.edit') }}
                                 </a>
 
@@ -45,13 +45,14 @@
 
                                 <inertia-link :href="route('app:projects.complete.store', { project: project.uuid })"
                                     class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
-                                    method="post" v-else-if="!project.is_completed && project.status !== 'archived'">
+                                    method="post" v-else-if="!project.is_completed && project.status !== 'archived' && $page.user.role !== 3">
                                     {{ $trans('labels.mark-as-completed') }}
                                 </inertia-link>
 
                                 <inertia-link :href="route('app:projects.complete.approve', { project: project.uuid })"
                                     class="block px-4 py-2 text-sm leading-5     text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
-                                    method="post" v-if="project.is_completed && project.is_approved != '1'">
+                                    method="post"
+                                    v-if="project.is_completed && project.is_approved != '1' && $page.user.role !== 3">
                                     {{ $trans('labels.approve') }}
                                 </inertia-link>
 
@@ -112,7 +113,7 @@
 
                 <div class="max-w-xs w-full flex-shrink-0 rounded-lg px-2">
                     <div class="flex flex-col h-full rounded-lg">
-                        <a @click.prevent="showAddColumnModal()" href="#"
+                        <a @click.prevent="showAddColumnModal()" href="#" v-if="$page.user.role !== 3"
                             class="flex items-center justify-center text-sm rounded-lg border border-dashed p-6 text-gray-600 hover:text-gray-700 hover:border-gray-400 focus:outline-none">
                             <div class="w-4 h-4 overflow-hidden mr-3">
                                 <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"

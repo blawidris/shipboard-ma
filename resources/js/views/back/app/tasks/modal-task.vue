@@ -13,7 +13,7 @@
 
                 <div class="pl-3 flex items-center">
                     <v-dropdown>
-                        <template v-slot:button>
+                        <template v-slot:button v-if="$page.user.role !== 3">
                             <button class="btn btn-sm btn-flat">
                                 <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path

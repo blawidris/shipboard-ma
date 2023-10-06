@@ -19,9 +19,22 @@
                 </div>
 
                 <div class="form-group mb-6">
+                    <label class="form-label">{{ $trans('labels.department') }}</label>
+                    <input class="form-input" v-model="form.department">
+                    <span class="invalid-feedback" v-if="$page.errors.has('name')">{{ $page.errors.first('name') }}</span>
+                </div>
+
+                <div class="form-group mb-6">
+                    <label class="form-label">{{ $trans('labels.phone') }}</label>
+                    <input class="form-input" v-model="form.phone">
+                    <span class="invalid-feedback" v-if="$page.errors.has('name')">{{ $page.errors.first('name') }}</span>
+                </div>
+
+                <div class="form-group mb-6">
                     <label class="form-label">{{ $trans('labels.password') }}</label>
                     <input type="password" class="form-input" v-model="form.password">
-                    <span class="invalid-feedback" v-if="$page.errors.has('password')">{{ $page.errors.first('password') }}</span>
+                    <span class="invalid-feedback" v-if="$page.errors.has('password')">{{ $page.errors.first('password')
+                    }}</span>
                 </div>
 
                 <div class="form-group">
@@ -48,66 +61,76 @@
 </template>
 
 <script>
-    import VModal from '@/components/modal'
-    import Form from '@/utils/form'
+import VModal from '@/components/modal'
+import Form from '@/utils/form'
 
-    export default {
-        components: {
-            VModal
+export default {
+    components: {
+        VModal
+    },
+
+    props: {
+        uuid: {
+            type: String,
+            required: true
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        email: {
+            type: String,
+            required: true
+        },
+        phone: {
+            type: String,
+            required: true
+        },
+        department: {
+            type: String,
+            required: true
+        },
+        role: {
+            type: Number,
+            required: true
+        }
+    },
+
+    data() {
+        return {
+            form: new Form({
+                name: this.name,
+                email: this.email,
+                department: this.department,
+                phone: this.phone,
+                password: '',
+                role: this.role === 2 ? 'admin' : 'user',
+            })
+        }
+    },
+
+    methods: {
+        show() {
+            this.$refs.modal.show();
         },
 
-        props: {
-            uuid: {
-                type: String,
-                required: true
-            },
-            name: {
-                type: String,
-                required: true
-            },
-            email: {
-                type: String,
-                required: true
-            },
-            role: {
-                type: Number,
-                required: true
-            }
+        hide() {
+            this.$refs.modal.hide();
         },
 
-        data() {
-            return {
-                form: new Form({
-                    name: this.name,
-                    email: this.email,
-                    password: '',
-                    role: this.role === 2 ? 'admin' : 'user',
-                })
-            }
-        },
+        submit() {
+            this.form.processing = true;
 
-        methods: {
-            show() {
-                this.$refs.modal.show();
-            },
+            this.$inertia.put(route('app:users.update', { user: this.uuid }), this.form.data())
+                .then(() => {
+                    this.form.processing = false;
 
-            hide() {
-                this.$refs.modal.hide();
-            },
-
-            submit() {
-                this.form.processing = true;
-
-                this.$inertia.put(route('app:users.update', {user: this.uuid}), this.form.data())
-                    .then(() => {
-                        this.form.processing = false;
-
-                        if (this.$page.errors.none()) {
-                            this.hide();
-                            this.form.reset();
-                        }
-                    });
-            }
+                    if (this.$page.errors.none()) {
+                        this.hide();
+                        this.form.reset();
+                    }
+                });
         }
     }
+}
 </script>

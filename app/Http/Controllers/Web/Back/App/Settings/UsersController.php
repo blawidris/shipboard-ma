@@ -39,7 +39,7 @@ class UsersController extends Controller
             ],
         ];
 
-        $notification = Activity::where('status', 'unread')->get();
+        $notification = Activity::where('status', 'unread')->orderBy('created_at', 'desc')->get();
 
         $notification->map(function ($notice) {
             $notice->datetime = Carbon::parse($notice->created_at)->diffForHumans();
@@ -68,16 +68,21 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'name'     => ['required', 'max:255'],
-            'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required'],
-            'role'     => ['required'],
+            'name'          => ['required', 'max:255'],
+            'email'         => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password'      => ['required'],
+            'role'          => ['required'],
+            'phone'         => ['required'],
+            'department'    => ['required'],
+
         ]);
 
         User::create([
             'name'      => $request->input('name'),
             'email'     => $request->input('email'),
             'password'  => bcrypt($request->input('password')),
+            'department'  => bcrypt($request->input('department')),
+            'phone'  => bcrypt($request->input('phone')),
             'role'      => $request->input('role') === 'admin' ? User::ROLE_TENANT_OWNER : User::ROLE_TENANT_USER,
             'tenant_id' => auth()->user()->tenant->id,
         ]);
@@ -100,6 +105,8 @@ class UsersController extends Controller
             'name'  => ['required'],
             'email' => ['required', 'email', Rule::unique('users')->ignore($request->user, 'uuid')],
             'role'  => ['required'],
+            'department' => 'required',
+            'phone' => 'required',
         ]);
 
         $user = User::where('uuid', $request->user)->firstOrFail();
@@ -113,6 +120,8 @@ class UsersController extends Controller
         $user->update([
             'name'  => $request->input('name'),
             'email' => $request->input('email'),
+            'phone' => $request->input('phone'),
+            'department' => $request->input('department'),
             'role'  => $request->input('role') == 'admin' ? User::ROLE_TENANT_OWNER : User::ROLE_TENANT_USER,
         ]);
 

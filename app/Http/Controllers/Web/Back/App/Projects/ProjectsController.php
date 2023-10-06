@@ -159,7 +159,10 @@ class ProjectsController extends Controller
                 'total_count' => 0,
                 'list' => []
             ],
+            'user' => auth()->user()->only(['name', 'email', 'role', 'uuid', 'avatar_url'])
         ];
+
+
 
         if (auth()->user()->role !== 3 || auth()->user()->isWatcher) {
             $data['notification'] = [

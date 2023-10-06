@@ -20,6 +20,8 @@ class CreateActivitiesTable extends Migration
             $table->string('comment');
             $table->enum('status', ['read', 'unread'])->default('unread');
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

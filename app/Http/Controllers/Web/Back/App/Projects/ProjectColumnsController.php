@@ -44,6 +44,8 @@ class ProjectColumnsController extends Controller
 
         $this->authorize('view', $project);
 
+
+
         $column = $project->columns()->create([
             'name'  => $request->input('name'),
             'index' => $project->columns->count(),
@@ -54,6 +56,7 @@ class ProjectColumnsController extends Controller
 
         $activityLog = Activity::create([
             'project_id' => $project->id,
+            'user_id' => auth()->user()->id,
             'comment' => auth()->user()->name . " has  created new column - {$column->name}"
         ]);
 

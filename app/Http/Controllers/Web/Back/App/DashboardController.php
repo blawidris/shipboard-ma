@@ -33,7 +33,7 @@ class DashboardController extends Controller
         $tasks = auth()->user()->tasks;
         $completedTasksByMonth = $this->getCompletedTasksByMonth();
         $completedTasksByDay = $this->getCompletedTasksByDay();
-        $notification = Activity::where('status', 'unread')->get();
+        $notification = Activity::where('status', 'unread')->orderBy('created_at', 'desc')->get();
         // $projects = $this->getUserProjects();
 
         $notification->map(function ($notice) {

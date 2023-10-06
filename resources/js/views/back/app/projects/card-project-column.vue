@@ -4,7 +4,7 @@
             <div class="flex items-center">
                 <span class="font-bold text-sm text-gray-700 truncate px-4 py-4">{{ column.name }}</span>
 
-                <div class="ml-auto flex items-center pr-3">
+                <div class="ml-auto flex items-center pr-3" v-if="$page.user.role !== 3">
                     <button @click="showAddTaskForm()"
                         class="flex items-center p-1 text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600">
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

@@ -2,7 +2,7 @@
     <a href="#" @click.prevent="$emit('click', task)"
         class="flex flex-col bg-white rounded-lg shadow mb-3 select-none focus:outline-none">
         <div class="flex items-center py-2 px-4 rounded-t-lg text-xs bg-green-100 text-green-500"
-            v-if="task.is_completed && task.is_approved === '1'">
+            v-if="task.is_completed && task.is_approved === '1' && $page.user.role !== 3">
             <svg class="w-3 h-3 mr-1.5" height="100%" viewBox="0 0 20 20" width="100%">
                 <g fill="none" fill-rule="evenodd">
                     <circle cx="10" cy="10" fill="currentColor" r="10"></circle>

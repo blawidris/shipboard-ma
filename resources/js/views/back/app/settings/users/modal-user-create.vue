@@ -13,6 +13,18 @@
                 </div>
 
                 <div class="form-group mb-6">
+                    <label class="form-label">{{ $trans('labels.department') }}</label>
+                    <input class="form-input" v-model="form.department">
+                    <span class="invalid-feedback" v-if="$page.errors.has('name')">{{ $page.errors.first('name') }}</span>
+                </div>
+
+                <div class="form-group mb-6">
+                    <label class="form-label">{{ $trans('labels.phone') }}</label>
+                    <input class="form-input" v-model="form.phone">
+                    <span class="invalid-feedback" v-if="$page.errors.has('name')">{{ $page.errors.first('name') }}</span>
+                </div>
+
+                <div class="form-group mb-6">
                     <label class="form-label">{{ $trans('labels.email') }}</label>
                     <input type="email" class="form-input" v-model="form.email">
                     <span class="invalid-feedback" v-if="$page.errors.has('email')">{{ $page.errors.first('email') }}</span>
@@ -21,8 +33,10 @@
                 <div class="form-group mb-6">
                     <label class="form-label">{{ $trans('labels.password') }}</label>
                     <input type="password" class="form-input" v-model="form.password">
-                    <span class="invalid-feedback" v-if="$page.errors.has('password')">{{ $page.errors.first('password') }}</span>
+                    <span class="invalid-feedback" v-if="$page.errors.has('password')">{{ $page.errors.first('password')
+                    }}</span>
                 </div>
+
 
                 <div class="form-group">
                     <label class="form-label">{{ $trans('labels.role') }}</label>
@@ -48,47 +62,49 @@
 </template>
 
 <script>
-    import VModal from '@/components/modal'
-    import Form from '@/utils/form'
+import VModal from '@/components/modal'
+import Form from '@/utils/form'
 
-    export default {
-        components: {
-            VModal
+export default {
+    components: {
+        VModal
+    },
+
+    data() {
+        return {
+            form: new Form({
+                name: '',
+                email: '',
+                password: '',
+                phone: '',
+                department: '',
+                role: 'user',
+            })
+        }
+    },
+
+    methods: {
+        show() {
+            this.$refs.modal.show();
         },
 
-        data() {
-            return {
-                form: new Form({
-                    name: '',
-                    email: '',
-                    password: '',
-                    role: 'user',
-                })
-            }
+        hide() {
+            this.$refs.modal.hide();
         },
 
-        methods: {
-            show() {
-                this.$refs.modal.show();
-            },
+        submit() {
+            this.form.processing = true;
 
-            hide() {
-                this.$refs.modal.hide();
-            },
+            this.$inertia.post(route('app:users.store'), this.form.data())
+                .then(() => {
+                    this.form.processing = false;
 
-            submit() {
-                this.form.processing = true;
-
-                this.$inertia.post(route('app:users.store'), this.form.data())
-                    .then(() => {
-                        this.form.processing = false;
-
-                        if (this.$page.errors.none()) {
-                            this.hide();
-                            this.form.reset();
-                        }
-                    });
-            }
+                    if (this.$page.errors.none()) {
+                        this.hide();
+                        this.form.reset();
+                    }
+                });
         }
     }
+}
 </script>

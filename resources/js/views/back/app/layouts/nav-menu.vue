@@ -21,7 +21,8 @@
 
                         <p
                             class="text-xs leading-4 font-medium text-gray-400 group-hover:text-gray-300 group-focus:underline transition ease-in-out duration-150">
-                            {{ $trans('labels.profile-settings') }}
+                            <!-- {{ $trans('labels.profile-settings') }} -->
+                            {{ $page.user.role === 3 ? 'Team Member' : 'Manager' }}
                         </p>
                     </div>
                 </div>
@@ -102,7 +103,6 @@
                 {{ $trans('labels.calendar') }}
             </inertia-link>
 
-            {{ $page.user.role }}
             <inertia-link :href="route('app:users.index')" v-if="$page.user.role !== 3"
                 :class="[route().current('app:users.index') ? 'text-white bg-gray-900' : 'text-gray-300']"
                 class="group mb-1 flex items-center px-6 py-2 text-sm leading-6 focus:outline-none focus:bg-gray-700 hover:text-white hover:bg-gray-700 transition ease-in-out duration-150">
@@ -164,7 +164,7 @@
             </inertia-link>
         </nav> -->
 
-        <nav class="block mt-3 bg-gray-800">
+        <nav class="block bg-gray-800">
             <div class="px-4 py-3">
                 <span class="text-sm text-gray-500 font-semibold">
                     {{ $trans('labels.favorites') }}
@@ -182,7 +182,17 @@
         </nav>
 
         <nav class="mt-auto">
-            <inertia-link :href="route('app:users.index')" v-if="$page.user.role !== 3"
+            <inertia-link :href="route('app:profile.edit')" v-if="$page.user.role == 3"
+                class="group flex items-center px-6 py-2 text-sm leading-6 text-gray-300 focus:outline-none focus:bg-gray-700 hover:text-white hover:bg-gray-700 transition ease-in-out duration-150">
+                <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current mr-3">
+                    <path
+                        d="M3.94 6.5L2.22 3.64l1.42-1.42L6.5 3.94c.52-.3 1.1-.54 1.7-.7L9 0h2l.8 3.24c.6.16 1.18.4 1.7.7l2.86-1.72 1.42 1.42-1.72 2.86c.3.52.54 1.1.7 1.7L20 9v2l-3.24.8c-.16.6-.4 1.18-.7 1.7l1.72 2.86-1.42 1.42-2.86-1.72c-.52.3-1.1.54-1.7.7L11 20H9l-.8-3.24c-.6-.16-1.18-.4-1.7-.7l-2.86 1.72-1.42-1.42 1.72-2.86c-.3-.52-.54-1.1-.7-1.7L0 11V9l3.24-.8c.16-.6.4-1.18.7-1.7zM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z">
+                    </path>
+                </svg>
+
+                {{ $trans('labels.settings') }}
+
+            </inertia-link> <inertia-link :href="route('app:users.index')" v-if="$page.user.role !== 3"
                 class="group flex items-center px-6 py-2 text-sm leading-6 text-gray-300 focus:outline-none focus:bg-gray-700 hover:text-white hover:bg-gray-700 transition ease-in-out duration-150">
                 <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current mr-3">
                     <path

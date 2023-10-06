@@ -80,7 +80,8 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-end w-full mb-4 sm:mb-0 sm:w-1/2 -mx-2">
+                    <div class="flex items-center justify-end w-full mb-4 sm:mb-0 sm:w-1/2 -mx-2"
+                        v-if="$page.user.role !== 3">
                         <div class="px-0 sm:px-2">
                             <button class="btn btn-indigo" @click="showCreateProjectModal()">
                                 {{ $trans('labels.create-project') }}

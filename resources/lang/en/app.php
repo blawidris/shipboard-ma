@@ -223,6 +223,8 @@ return [
         'enable-custom-homepage'       => 'Enable Custom Homepage',
         'url'                          => 'URL',
         'messages'                     => 'Messages',
+        'phone'                        => 'Phone',
+        'department'                        => 'Department',
         'subtexts'                     => [
             'you-see-this-project'                 => 'Only you can see this project',
             'team-members-see-this-project'        => 'Only assigned team members can see this project',
