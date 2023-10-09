@@ -198,7 +198,7 @@ class ProjectsController extends Controller
             ],
         ],
     ];
-    
+
     /**
      * Create a new controller instance.
      *
@@ -286,7 +286,7 @@ class ProjectsController extends Controller
         });
 
         $data = [
-            'users'   => User::orderBy('name')->get()->map->only(['uuid', 'name', 'email', 'avatar_url', 'role']),
+            'users'   => User::orderBy('id')->get()->map->only(['uuid', 'name', 'email', 'avatar_url', 'role']),
             'can'     => [
                 'update_project'  => auth()->user()->can('update', $project),
                 'archive_project' => auth()->user()->can('delete', $project),
@@ -312,11 +312,13 @@ class ProjectsController extends Controller
                 'is_watched'   => $project->isWatched(),
                 'columns'      => $project->columns->sortBy('index')->map(function ($column) {
                     return [
+
                         'uuid'  => $column->uuid,
                         'name'  => $column->name,
                         'index' => $column->index,
-                        'tasks' => $column->tasks()->mainTasks()->get()->sortByDesc('index')->transform(function ($task) {
+                        'tasks' => $column->tasks()->mainTasks()->get()->sortBy('id')->transform(function ($task) {
                             return [
+                                'id'           => $task->id,
                                 'uuid'         => $task->uuid,
                                 'content'      => $task->content,
                                 'index'        => $task->index,

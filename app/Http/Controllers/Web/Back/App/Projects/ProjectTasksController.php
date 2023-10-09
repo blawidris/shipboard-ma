@@ -294,4 +294,5 @@ class ProjectTasksController extends Controller
 
         return $task->markAsIncompleted();
     }
+
 }

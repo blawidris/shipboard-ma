@@ -19,7 +19,7 @@
             <div>
                 <v-dropdown>
                     <template v-slot:button>
-                        <a href="#" :class="{ 'text-indigo-600 hover:text-indigo-700' : form.due_date }" class="ml-1 flex items-center justify-center rounded-full overflow-hidden text-gray-400 border w-6 h-6 overflow-hidden hover:text-gray-500 hover:bg-gray-50">
+                        <a href="#" :class="{ 'text-indigo-600 hover:text-indigo-700' : form.due_date }" class="ml-1 flex items-center justify-center rounded-full overflow-hidden text-gray-400 border w-6 h-6 hover:text-gray-500 hover:bg-gray-50">
                             <svg viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
                                 <path d="M1 4c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4zm2 2v12h14V6H3zm2-6h2v2H5V0zm8 0h2v2h-2V0zM5 9h2v2H5V9zm0 4h2v2H5v-2zm4-4h2v2H9V9zm0 4h2v2H9v-2zm4-4h2v2h-2V9zm0 4h2v2h-2v-2z"/>
                             </svg>
