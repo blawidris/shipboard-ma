@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Web\Back\App\Projects;
 
+use App\Events\Project\CreateDefaultColumn;
+use App\Events\Project\PredefinedColumnsTemplate;
 use App\Events\Project\ProjectAssignedToUser;
 use App\Events\Project\ProjectTimelineChanged;
 use App\Filters\ProjectFilter;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
+use App\Models\Column;
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,6 +19,186 @@ use Inertia\Inertia;
 
 class ProjectsController extends Controller
 {
+
+    protected $tasks  = [
+        [
+            'name' => 'Receive Client Brief',
+            'todos' => [
+                'Receive client brief from email.',
+                'Receive client briefs from directors.',
+                'Receive client briefs from phone calls or referrals.',
+            ],
+        ],
+        [
+            'name' => 'Respond to Client\'s Brief',
+            'todos' => [
+                'Engage architects for site visits.',
+                'Define project stages.',
+                'Generate reports and record findings.',
+            ],
+        ],
+        [
+            'name' => 'Design Stage',
+            'todos' => [
+                'Request a meeting with the creative director.',
+                'Receive design direction from the creative director.',
+                'Create initial design drafts.',
+                'Share designs with the creative director for review.',
+                'Implement changes based on the creative director\'s feedback.',
+                'Share the revised design with the client.',
+            ],
+        ],
+        [
+            'name' => 'Client Design Review and Sign-Off',
+            'todos' => [
+                'Client reviews and suggests design changes.',
+                'The client approves the final design.',
+            ],
+        ],
+        [
+            'name' => 'Quotation Stage',
+            'todos' => [
+                'Break down the quotation process.',
+                'Estimate material costs and availability.',
+                'Include design costs in the quotation.',
+                'Prepare a quotation sheet for approval with various markups.',
+                'Get approved markup percentage from BDD.',
+                'Send the quotation to the client.',
+                'Negotiate the quotation with the client.',
+                'Obtain final client sign-off on the quotation.',
+                'Request funds from the client for the approved quotation.',
+            ],
+        ],
+        [
+            'name' => 'Purchase Order (PO) Processing',
+            'todos' => [
+                'If working with blue-chip clients on a PO basis, request and expect the PO.',
+            ],
+        ],
+        [
+            'name' => 'Production Stage',
+            'todos' => [
+                'Architects to develop production drawings.',
+                'Ensure production drawings include all dimensions.',
+                'Send production drawings to Creative Director for approvals/adjustments.',
+                'Plan for drainage, if needed.',
+            ],
+        ],
+        [
+            'name' => 'Audit and Cost Review',
+            'todos' => [
+                'Audit all project costs.',
+                'Review and verify project costs.',
+                'Audit to Conduct negotiations with various vendors.',
+                'Audit to send budgets in for approval.',
+                'Audit to Communicate negotiated and approved prices to procurement/pass budget to accounts.',
+            ],
+        ],
+        [
+            'name' => 'Procurement',
+            'todos' => [
+                'Receive the list of items from the audit.',
+                'Categorize items based on suppliers and project categories.',
+                'Allocate costs to each vendor.',
+                'Collect account details from vendors.',
+                'Cross-check items available in the store against the project requirements.',
+                'Transfer items from the store to accounts.',
+                'Confirm and eliminate any item duplication.',
+                'Request and obtain approvals for procurement decisions.',
+            ],
+        ],
+        [
+            'name' => 'Accounts',
+            'todos' => [
+                'Verify and confirm items received from procurement.',
+                'Check for item duplications.',
+                'Upload verified items and project details.',
+                'Request and obtain necessary approvals at this stage.',
+            ],
+        ],
+        [
+            'name' => 'Production Phase',
+            'todos' => [
+                'Confirm materials delivered by procurement.',
+                'Allocate production location and workforce.',
+                'Identify and hire contractors for specialized work (e.g., carpentry, glasswork).',
+                'Break down production stages and requirements.',
+                'Monitor progress and meet deadlines.',
+                'Conduct quality checks at different production stages.',
+                'Gain approvals for different production phases.',
+            ],
+        ],
+        [
+            'name' => 'Planning the Installation',
+            'todos' => [
+                'Plan the timing and schedule for the installation team\'s arrival.',
+                'Coordinate with relevant parties to ensure a smooth arrival.',
+                'Arrange for the necessary transportation, such as a truck.',
+                'Analyze cost estimates for installation materials and labor and raise the installation budget.',
+                'Identify and assign qualified personnel for the installation team.',
+                'Determine roles and responsibilities within the team.',
+                'Create a comprehensive checklist of all items to be moved and installed.',
+                'Decide if any drills or additional tools are required for the installation.',
+            ],
+        ],
+        [
+            'name' => 'Installation Phase',
+            'todos' => [
+                'Assemble the installation team, budget, and timelines.',
+                'Identify the installation location.',
+                'Coordinate the arrival of trucks for materials.',
+                'Ensure the checklist is completed with all necessary items.',
+                'Confirm that all listed items are loaded onto the truck.',
+                'Verify that items leaving the company match the checklist.',
+                'Record any items added to or removed from the checklist.',
+                'Ensure security measures are in place during loading.',
+                'Share a copy of the checklist/loaded items with the driver and security personnel for checks.',
+                'Confirm the timeline for truck arrival.',
+            ],
+        ],
+        [
+            'name' => 'Transition to Installation Site',
+            'todos' => [
+                'Confirm that the truck has left with all the items.',
+                'Supervise the unloading and delivery of materials at the installation site.',
+                'Initiate the installation process at the site.',
+                'Document the current state of the site with photographs.',
+                'Continuously capture images of the work in progress.',
+                'Seek approval or guidance for resolving any issues encountered.',
+                'Continue with the installation process.',
+                'Quality Control and Monitoring:',
+                'Conduct quality control checks during and after installation.',
+                'Document any scratches, tears, gaps, or imperfections.',
+                'Share images with management for resolution directions.',
+            ],
+        ],
+        [
+            'name' => 'Completion and Client Sign-Off',
+            'todos' => [
+                'Sign off on each installation step.',
+                'Verify the location\'s finish and quality of work.',
+                'Obtain client sign-off on the completed installation.',
+                'Ensure that sign-off is communicated to the accounts department.',
+            ],
+        ],
+        [
+            'name' => 'Financial Closing',
+            'todos' => [
+                'Receive the balance payment from the client for the installation services.',
+                'Close the project financially.',
+                'Document the entire process and project history.',
+            ],
+        ],
+        [
+            'name' => 'Project Completion: Documentation and Archiving',
+            'todos' => [
+                'Archive final designs and installation images in cloud storage for future reference.',
+                'Store project-related documents and learning materials in the cloud for easy access.',
+                'Finalize the project by uploading all necessary documentation to the appropriate storage location (ABC folder).',
+            ],
+        ],
+    ];
+    
     /**
      * Create a new controller instance.
      *
@@ -201,9 +385,16 @@ class ProjectsController extends Controller
             'tenant_id'   => tenant()->id,
         ]);
 
+        // create project column
+        $column = $this->createColumn($project);
+
+
+        // CreateDefaultColumn::dispatch($project);
+
         $this->updateProjectTimeline($project, $request);
 
         $this->syncProjectTeamMembers($project, $request);
+
 
         session()->flash('message', __('app.messages.project-created'));
 
@@ -369,5 +560,56 @@ class ProjectsController extends Controller
                     'color' => $project->color,
                 ];
             });
+    }
+
+    protected function createColumn($project)
+    {
+
+        $columns = ['not started', 'in progress', 'review', 'completed', 'overview'];
+
+        foreach ($columns as $column) {
+            $project->columns()->create([
+                'name' => $column,
+                'index' => $project->columns->count()
+            ]);
+        }
+
+        $column = $project->columns()->first();
+
+        // create task
+        $this->createColumnTask($column);
+    }
+
+
+    protected function createColumnTask($column)
+    {
+        $column = Column::where('uuid', $column->uuid)->firstorFail();
+
+        foreach ($this->tasks as $key => $task) {
+            $tas = $column->tasks()->create([
+                'content' => $task['name'],
+                'index' => $column->tasks->count()
+            ]);
+
+            $task['uuid'] = $tas->uuid;
+            $task['id'] = $tas->id;
+
+            // create subtask
+            $this->createColumnTaskSubTask($task);
+        }
+    }
+
+    protected function createColumnTaskSubTask($task)
+    {
+
+
+        $tas = Task::with('column')->where('uuid', $task['uuid'])->firstOrFail();
+
+        foreach ($task['todos'] as $subTask) {
+            $tas->create([
+                'content' => $subTask,
+                'task_id' => $task['id'],
+            ]);
+        }
     }
 }

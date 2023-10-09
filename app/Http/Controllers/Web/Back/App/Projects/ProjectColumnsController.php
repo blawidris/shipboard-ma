@@ -44,8 +44,7 @@ class ProjectColumnsController extends Controller
 
         $this->authorize('view', $project);
 
-
-
+        // create project column
         $column = $project->columns()->create([
             'name'  => $request->input('name'),
             'index' => $project->columns->count(),

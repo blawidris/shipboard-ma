@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\Project\CreateDefaultColumn;
+use App\Events\Project\PredefinedColumnsTemplate;
 use App\Events\Project\ProjectAssignedToUser;
 use App\Events\Project\ProjectStatusChanged;
 use App\Events\Project\ProjectTimelineChanged;
@@ -9,6 +11,10 @@ use App\Events\Task\TaskAssignedToUser;
 use App\Events\Task\TaskDeadlineChanged;
 use App\Events\Task\TaskPhaseChanged;
 use App\Events\Task\TaskStatusChanged;
+use App\Listeners\Project\ColumnTableTemplate;
+use App\Listeners\Project\ColumnTaskTemplate;
+use App\Listeners\Project\ColumnTodoTemplate;
+use App\Listeners\Project\CreateColumnTask;
 use App\Listeners\Project\NotifyAssignedToProject;
 use App\Listeners\Project\NotifyProjectStatusChanged;
 use App\Listeners\Project\NotifyProjectTimelineChanged;
@@ -18,6 +24,7 @@ use App\Listeners\Task\NotifyAssignedToTeamMember;
 use App\Listeners\Task\NotifyTaskDeadlineChanged;
 use App\Listeners\Task\NotifyTaskPhaseChanged;
 use App\Listeners\Task\NotifyTaskStatusChanged;
+use CreateColumnsTable;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -28,6 +35,7 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
+
         ProjectAssignedToUser::class => [
             NotifyAssignedToProject::class,
             NotifyTeamMemberJoined::class,
@@ -56,6 +64,11 @@ class EventServiceProvider extends ServiceProvider
 
         TaskDeadlineChanged::class => [
             NotifyTaskDeadlineChanged::class,
+        ],
+
+        CreateDefaultColumn::class => [
+            ColumnTableTemplate::class,
+            CreateColumnTask::class
         ]
     ];
 
