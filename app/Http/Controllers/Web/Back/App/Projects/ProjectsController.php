@@ -240,7 +240,7 @@ class ProjectsController extends Controller
                         'description'   => $project->description,
                         'status'        => $project->status,
                         'approved'        => strVal($project->is_approved),
-                        'pending_tasks' => $project->tasks()->pending()->count(),
+                        'pending_tasks' => $project->tasks()->pending()->where('task_id', null)->count(),
                         'days_left'     => $project->days_left,
                         'team_members'  => $project->teamMembers->transform(function ($user) {
                             return [
@@ -316,7 +316,8 @@ class ProjectsController extends Controller
                         'uuid'  => $column->uuid,
                         'name'  => $column->name,
                         'index' => $column->index,
-                        'tasks' => $column->tasks()->mainTasks()->get()->sortBy('id')->transform(function ($task) {
+                        'tasks' => $column->tasks()->get()->sortBy('id')->transform(function ($task) {
+                            // 'tasks' => $column->tasks()->mainTasks()->get()->sortBy('id')->transform(function ($task) {
                             return [
                                 'id'           => $task->id,
                                 'uuid'         => $task->uuid,
@@ -332,8 +333,10 @@ class ProjectsController extends Controller
                                     'avatar_url' => optional($task->user)->avatar_url,
                                 ],
                                 'sub_tasks'    => [
-                                    'total'     => $task->tasks()->subTasks()->count(),
-                                    'completed' => $task->tasks()->subTasks()->completed()->count(),
+                                    // 'total'     => $task->tasks()->subTasks()->count(),
+                                    'total'     => $task->subTasks()->count(),
+                                    'completed' => $task->subTasks()->completed()->count(),
+                                    // 'completed' => $task->tasks()->subTasks()->completed()->count(),
                                 ]
                             ];
                         })->values()
@@ -347,8 +350,6 @@ class ProjectsController extends Controller
             ],
             'user' => auth()->user()->only(['name', 'email', 'role', 'uuid', 'avatar_url'])
         ];
-
-
 
         if (auth()->user()->role !== 3 || auth()->user()->isWatcher) {
             $data['notification'] = [
@@ -388,11 +389,9 @@ class ProjectsController extends Controller
         ]);
 
         // create project column
-        $column = $this->createColumn($project);
-
+        $this->createColumn($project);
 
         // CreateDefaultColumn::dispatch($project);
-
         $this->updateProjectTimeline($project, $request);
 
         $this->syncProjectTeamMembers($project, $request);
@@ -567,7 +566,7 @@ class ProjectsController extends Controller
     protected function createColumn($project)
     {
 
-        $columns = ['not started', 'in progress', 'review', 'completed', 'overview'];
+        $columns = ['not started', 'in progress', 'review', 'completed', 'overdue'];
 
         foreach ($columns as $column) {
             $project->columns()->create([
@@ -594,6 +593,7 @@ class ProjectsController extends Controller
             ]);
 
             $task['uuid'] = $tas->uuid;
+            $task['column_id'] = $tas->column_id;
             $task['id'] = $tas->id;
 
             // create subtask
@@ -608,9 +608,10 @@ class ProjectsController extends Controller
         $tas = Task::with('column')->where('uuid', $task['uuid'])->firstOrFail();
 
         foreach ($task['todos'] as $subTask) {
-            $tas->create([
+            $tas->subtasks()->create([
                 'content' => $subTask,
                 'task_id' => $task['id'],
+                'column_id' => $task['column_id']
             ]);
         }
     }

@@ -45,7 +45,7 @@ class Task extends Model
      * @var array
      */
     protected $dates = [
-        'due_date', 'completed_at',
+        'due_date', 'completed_at', 'start_date'
     ];
 
 
@@ -138,7 +138,8 @@ class Task extends Model
      */
     public function scopeMainTasks($query)
     {
-        $query->whereNull('task_id');
+        // $query->whereNull('task_id');
+        $query->whereNotNull('uuid');
     }
 
     /**
@@ -148,7 +149,8 @@ class Task extends Model
      */
     public function scopeSubTasks($query)
     {
-        $query->whereNotNull('task_id');
+        // $query->whereNotNull('task_id');
+        return $this->hasMany(Subtask::class);
     }
 
     /**
@@ -263,7 +265,7 @@ class Task extends Model
     public function markAsApproved()
     {
         if (!$this->completed_at) {
-            return tap($this->update(['is_approved' => 1]), function () {
+            return tap($this->update(['is_approved' => 1, 'completed_at' => now()]), function () {
                 event(new TaskStatusChanged($this));
             });
         }
@@ -276,8 +278,8 @@ class Task extends Model
      */
     public function markAsUnApproved()
     {
-        if (!$this->completed_at) {
-            return tap($this->update(['is_approved' => 0]), function () {
+        if ($this->completed_at) {
+            return tap($this->update(['is_approved' => 0, 'completed_at' => null]), function () {
                 event(new TaskStatusChanged($this));
             });
         }
@@ -291,7 +293,7 @@ class Task extends Model
     public function markAsIncompleted()
     {
         if ($this->completed_at) {
-            return tap($this->update(['completed_at' => null, 'is_approved' => null]), function () {
+            return tap($this->update(['completed_at' => null, 'is_approved' => 0, 'column_id' => ($this->column_id -1)]), function () {
                 event(new TaskStatusChanged($this));
             });
         }

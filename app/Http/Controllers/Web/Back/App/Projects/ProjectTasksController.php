@@ -92,7 +92,6 @@ class ProjectTasksController extends Controller
         ]);
 
 
-
         if ($task->wasChanged('due_date')) {
             event(new TaskDeadlineChanged($task));
         }
@@ -125,8 +124,10 @@ class ProjectTasksController extends Controller
         }
 
         $task->update([
-            'is_approved' => 1
+            'is_approved' => 1,
+            'column_id' => ($task->column->project->columns->max('id') - 1)
         ]);
+
 
         $activityLog = Activity::create([
             'project_id' => $task->column->project_id,
@@ -136,11 +137,11 @@ class ProjectTasksController extends Controller
 
         $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
 
-        // if ($projectWatcher) {
-        //     foreach ($projectWatcher as $watcher) {
-        //         Mail::send(new ProjectTaskMail($activityLog, $watcher));
-        //     }
-        // }
+        if ($projectWatcher) {
+            foreach ($projectWatcher as $watcher) {
+                Mail::send(new ProjectTaskMail($activityLog, $watcher));
+            }
+        }
 
         return back();
     }
@@ -202,21 +203,24 @@ class ProjectTasksController extends Controller
 
         $this->authorize('delete', $task);
 
+
+        $activityLog = Activity::create([
+            'project_id' => $task->column->project->id,
+            'user_id' => auth()->user()->id,
+            'task_id' => $task->id,
+            'comment' => auth()->user()->name . " was removed from task list"
+        ]);
+
         $task->delete();
 
-        // $activityLog = Activity::create([
-        //     'project_id' => $task->column->project_id,
-        //     'user_id' => auth()->user()->id,
-        //     'comment' => auth()->user()->name . " has deleted $task->content task"
-        // ]);
 
-        // $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
+        $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
 
-        // if ($projectWatcher) {
-        //     foreach ($projectWatcher as $watcher) {
-        //         Mail::send(new ProjectTaskMail($activityLog, $watcher));
-        //     }
-        // }
+        if ($projectWatcher) {
+            foreach ($projectWatcher as $watcher) {
+                Mail::send(new ProjectTaskMail($activityLog, $watcher));
+            }
+        }
 
         return back();
     }
@@ -237,25 +241,36 @@ class ProjectTasksController extends Controller
                 User::where('uuid', $request->input('user_uuid'))->firstOrFail()
             );
 
-            // $activityLog = Activity::create([
-            //     'project_id' => $task->column->project_id,
-            //     'user_id' => auth()->user()->id,
-            //     'comment' => "New user has been assign to {$task->content} task"
-            // ]);
+            // dd($task->column_id);
 
-            // $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
+            $activity = [
+                'project_id' => null,
+                'user_id' => auth()->user()->id,
+                'task_id' => $task->id,
+                'comment' => "New user has been assign to {$task->content} task"
+            ];
 
-            // if ($projectWatcher) {
-            //     foreach ($projectWatcher as $watcher) {
-            //         Mail::send(new ProjectTaskMail($activityLog, $watcher));
-            //     }
-            // }
+            $projectWatcher = ProjectWatcher::query()->with(['user', 'project']);
+
+
+            if ($task->column_id) {
+                $activity['project_id'] = $task->column->project_id;
+
+                $projectWatcher->where('project_id', $task->column->project_id);
+            }
+
+            $projectWatcher->get();
+
+            $activityLog = Activity::create($activity);
+
+            if ($projectWatcher) {
+                foreach ($projectWatcher as $watcher) {
+                    Mail::send(new ProjectTaskMail($activityLog, $watcher));
+                }
+            }
 
             return $assignedTo;
         }
-
-
-
 
         return $task->unassignUser();
     }
@@ -269,24 +284,27 @@ class ProjectTasksController extends Controller
      */
     protected function updateTaskStatus($task, $request)
     {
+
         if ($request->input('is_completed')) {
 
-            // if (auth()->user()->role === 1) {
+            if (auth()->user()->role === 1) {
+                $activityLog = Activity::create([
+                    'project_id' => $task->column->project_id,
+                    'task_id' => $task->id,
+                    'user_id' => auth()->user()->id,
+                    'comment' => auth()->user()->name . " has completed $task->content task"
+                ]);
 
-            //     $activityLog = Activity::create([
-            //         'project_id' => $task->column->project_id,
-            //         'user_id' => auth()->user()->id,
-            //         'comment' => auth()->user()->name . " has completed $task->content task"
-            //     ]);
-            // }
+                Mail::send(new ProjectTaskMail($activityLog, $task));
+            }
 
-            // $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
+            $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $task->column->project_id)->get();
 
-            // if ($projectWatcher) {
-            //     foreach ($projectWatcher as $watcher) {
-            //         Mail::send(new ProjectTaskMail($activityLog, $watcher));
-            //     }
-            // }
+            if ($projectWatcher) {
+                foreach ($projectWatcher as $watcher) {
+                    Mail::send(new ProjectTaskMail($activityLog, $watcher));
+                }
+            }
             return $task->markAsCompleted();
         }
 
@@ -294,5 +312,4 @@ class ProjectTasksController extends Controller
 
         return $task->markAsIncompleted();
     }
-
 }

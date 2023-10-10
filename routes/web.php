@@ -246,6 +246,8 @@ Route::group(['namespace' => 'Web\Back\App', 'prefix' => 'app', 'as' => 'app:'],
      */
     Route::get('projects/{project}/tasks/{task}/subtasks', 'Projects\ProjectSubTasksController@index')->name('project.task.sub-tasks.index');
     Route::post('projects/{project}/tasks/{task}/subtasks', 'Projects\ProjectSubTasksController@store')->name('project.task.sub-tasks.store');
+    Route::put('projects/{project}/tasks/{task}/subtasks', 'Projects\ProjectSubTasksController@update')->name('project.task.sub-tasks.update');
+    // Route::post('projects/{project}/tasks/{task}/subtasks', 'Projects\ProjectSubTasksController@store')->name('project.task.sub-tasks.store');
 
     /**
      * Task Attachments

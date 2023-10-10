@@ -51,6 +51,7 @@ return [
         'status'                       => 'Status',
         'all'                          => 'All',
         'ongoing'                      => 'Ongoing',
+        'not-started'                      => 'Not started',
         'archived'                     => 'Archived',
         'completed'                    => 'Completed',
         'pending'                      => 'Waiting Approval',

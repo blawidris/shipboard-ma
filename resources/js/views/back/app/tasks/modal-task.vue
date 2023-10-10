@@ -64,12 +64,14 @@
                                 </path>
                             </svg>
 
+                            <span v-if="task.start_date">{{ task.due_date }}</span>
                             <span v-if="task.due_date">{{ task.due_date }}</span>
                             <span v-else>{{ $trans('labels.due-date') }}</span>
                         </a>
                     </template>
 
                     <template v-slot:content>
+                        <v-input-date inline v-model="task.start_date" @input="updateTask()" />
                         <v-input-date inline v-model="task.due_date" @input="updateTask()" />
                     </template>
                 </v-dropdown>

@@ -67,6 +67,10 @@ class Project extends Model
      */
     public function getStatusAttribute()
     {
+        if ($this->isNotStarted()) {
+            return 'not started';
+        }
+
         if ($this->isOngoing()) {
             return 'ongoing';
         }
@@ -121,6 +125,26 @@ class Project extends Model
             ->orWhere('end_date', null)
             ->whereNull('completed_at')
             ->whereNull('deleted_at');
+    }
+
+    public function scopeNotStarted($query)
+    {
+        $now = Carbon::now();
+
+        $query->where(function ($query) use ($now) {
+            // Check if there are no completed tasks or subtasks
+            $query->doesntHave('columns.tasks.subtasks', 'and', function ($query) {
+                $query->whereNotNull('completed_at');
+            })
+                // Check if the project end date is not set or it's in the future
+                ->where(function ($query) use ($now) {
+                    $query->where('end_date', '>', $now)->orWhereNull('end_date');
+                })
+                // Check if the project is not marked as completed
+                ->whereNull('completed_at')
+                // Check if the project is not trashed
+                ->whereNull('deleted_at');
+        });
     }
 
     /**
@@ -238,15 +262,52 @@ class Project extends Model
     }
 
     /**
+     * Determine if the project is not started.
+     *
+     * @return bool
+     */
+
+    public function isNotStarted()
+    {
+        // Check if the task has no end date or if the end date is in the future
+        $endDateIsFuture = optional($this->end_date)->isFuture() || $this->end_date === null;
+
+        // Check if the task is not completed
+        $notCompleted = $this->completed_at === null;
+
+        // Check if there are no uncompleted task or subtasks in the task's column
+        $hasCompletedTasksOrSubtask = $this->columns->flatMap(function ($column) {
+            return $column->tasks->flatMap(function ($task) {
+                return $task->tasks->whereNotNull('completed_at');
+            });
+        })->isEmpty();
+
+        // Check if the task is not trashed
+        $notTrashed = !$this->trashed();
+
+        // Return true if all conditions are met
+        return $endDateIsFuture && $notCompleted && $hasCompletedTasksOrSubtask  && $notTrashed;
+    }
+
+
+
+    /**
      * Determine if the project is ongonig.
      *
      * @return bool
      */
     public function isOngoing()
     {
-        return (optional($this->end_date)->isFuture() || $this->end_date === null) &&
-            $this->completed_at === null &&
-            !$this->trashed();
+
+        // Check if the task has no end date or if the end date is in the future
+        $endDateIsFuture = optional($this->end_date)->isFuture() || $this->end_date === null;
+
+        $notTrashed = !$this->trashed();
+
+        // Check if the task is not completed
+        $notCompleted = $this->completed_at === null;
+
+        return $endDateIsFuture && $notCompleted && $notTrashed;
     }
 
     /**
@@ -393,5 +454,6 @@ class Project extends Model
     //     return $this->belongsToMany(User::class, 'activities');
 
     //     // return $this->;
+
     // }
 }

@@ -45,6 +45,7 @@
                                             <label class="form-label">{{ $trans('labels.status') }}</label>
                                             <select class="form-select" v-model="filtersForm.status">
                                                 <option :value="null">{{ $trans('labels.all') }}</option>
+                                                <option value="ongoing">{{ $trans('labels.not-started') }}</option>
                                                 <option value="ongoing">{{ $trans('labels.ongoing') }}</option>
                                                 <option value="overdue">{{ $trans('labels.overdue') }}</option>
                                                 <option value="completed">{{ $trans('labels.completed') }}</option>
@@ -90,11 +91,12 @@
                     </div>
                 </div>
 
-                <div class="bg-white shadow overflow-hidden rounded-md" v-if="$page.projects.data.length">
+                <div class="overflow-hidden" v-if="$page.projects.data.length">
                     <ul>
 
                         <!-- {{ $page.projects.data }} -->
-                        <li class="border-b border-gray-100 last:border-0" v-for="project in $page.projects.data">
+                        <li class="border-b border-gray-100 last:border-0 mb-3 bg-white shadow rounded-md"
+                            v-for="project in $page.projects.data">
                             <inertia-link :href="route('app:projects.show', project.uuid)"
                                 class="block hover:bg-gray-50 focus:outline-none focus:bg-gray-50 transition duration-150 ease-in-out">
                                 <div class="px-6 py-4 flex items-center">
@@ -158,6 +160,9 @@
                                         </div>
 
                                         <div class="mt-2 flex items-center md:col-span-1 sm:mt-0">
+                                            <span class="badge badge-yellow" v-if="project.status === 'not started'">
+                                                {{ $trans('labels.not-started') }}
+                                            </span>
                                             <span class="badge badge-indigo" v-if="project.status === 'ongoing'">{{
                                                 $trans('labels.ongoing') }}
                                             </span>

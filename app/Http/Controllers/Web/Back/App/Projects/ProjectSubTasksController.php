@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Mail\ProjectTaskMail;
 use App\Models\Activity;
 use App\Models\ProjectWatcher;
+use App\Models\Subtask;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -34,9 +36,11 @@ class ProjectSubTasksController extends Controller
     {
         $task = Task::where('uuid', $request->task)->firstOrFail();
 
+        // dd($task->subTasks()->latest());
+
         $this->authorize('view', $task);
 
-        return $task->tasks()->latest()->get()->transform(function ($task) {
+        $data = $task->subTasks()->latest()->get()->transform(function ($task) {
             return [
                 'uuid'         => $task->uuid,
                 'content'      => $task->content,
@@ -50,6 +54,10 @@ class ProjectSubTasksController extends Controller
                 ],
             ];
         })->values();
+
+        // dd($data);
+
+        return $data;
     }
 
     /**
@@ -70,14 +78,20 @@ class ProjectSubTasksController extends Controller
 
         $this->authorize('create', [Task::class, $task->column->project]);
 
-        $subTask = Task::create([
+        $subTask = $task->subTasks()->create([
             'content' => $request->input('content'),
             'task_id' => $task->id,
         ]);
+        // $subTask = Task::create([
+        // 'content' => $request->input('content'),
+        // 'task_id' => $task->id,
+        // 'column_id' => $task->column->id
+        // ]);
 
         $activityLog = Activity::create([
             'project_id' => $task->column->project_id,
             'user_id' => $request->user()->id,
+            'task_id' => $task->id,
             'comment' => "A subtask has been created - {$subTask->content}"
         ]);
 
@@ -91,5 +105,171 @@ class ProjectSubTasksController extends Controller
         }
 
         return back();
+    }
+
+    public function update(Request $request)
+    {
+        $subtask = Subtask::with('task')->where('uuid', $request->task)->firstOrFail();
+
+        // dd($task);
+
+        $this->authorize('create', [Task::class, $subtask->task->column->project->id]);
+
+        $subtask->update([
+            'content'  => $request->input('content'),
+            'due_date' => $request->input('due_date'),
+        ]);
+
+
+        $this->updateAssignedTaskUser($subtask, $request);
+
+        $this->updateSubTaskStatus($subtask, $request);
+
+        return back();
+    }
+
+
+    /**
+     * Set or unset assigned task user.
+     *
+     * @param \App\Models\Task $task
+     * @param \Illuminate\Http\Request $request
+     * @return boolean
+     */
+    protected function updateAssignedTaskUser($subtask, $request)
+    {
+
+        if ($request->input('user_uuid')) {
+
+            // dd($request->input('user_uuid'));
+
+            $user = User::where('uuid', $request->input('user_uuid'))->firstOrFail();
+
+            // dd($subtask);
+
+            $assignedTo = $subtask->assignTo($user);
+
+            $activity = [
+                'project_id' => $subtask->task->column->project_id,
+                'user_id' => auth()->user()->id,
+                'task_id' => $subtask->task->id,
+                'comment' => "New user has been assign to a task todo"
+            ];
+
+            $projectWatcher = ProjectWatcher::query()->with(['user', 'project']);
+
+
+            if ($subtask->task->column_id) {
+                $activity['project_id'] = $subtask->task->column->project_id;
+
+                $projectWatcher->where('project_id', $subtask->task->column->project_id);
+            }
+
+            $projectWatcher->get();
+
+            $activityLog = Activity::create($activity);
+
+            if ($projectWatcher) {
+                foreach ($projectWatcher as $watcher) {
+                    Mail::send(new ProjectTaskMail($activityLog, $watcher));
+                }
+            }
+
+            return $assignedTo;
+        }
+
+        return $subtask->unassignUser();
+    }
+
+    protected function updateSubTaskStatus($subtask, $request)
+    {
+
+        if ($request->input('is_completed')) {
+
+            $activityLog = Activity::create([
+                'project_id' => $subtask->task->column->project_id,
+                'task_id' => $subtask->task->id,
+                'user_id' => auth()->user()->id,
+                'comment' => auth()->user()->name . " has completed $subtask->content task"
+            ]);
+
+
+            $projectWatcher = ProjectWatcher::with(['user', 'project'])->where('project_id', $subtask->task->column->project_id)->get();
+
+            if ($projectWatcher) {
+                foreach ($projectWatcher as $watcher) {
+                    Mail::send(new ProjectTaskMail($activityLog, $watcher));
+                }
+            }
+
+
+            $isCompleted = $subtask->markAsCompleted();
+
+            $this->moveTask($subtask->task->id);
+
+            return $isCompleted;
+        }
+
+        $this->revertMovedTask($subtask->task->id);
+        $inCompleted = $subtask->markAsIncompleted();
+
+        return $inCompleted;
+    }
+
+    protected function moveTask($task)
+    {
+
+        // get task
+        $task = Task::with('column')->where('id', $task)->firstOrFail();
+
+        // list of subtask;
+        $totalTaskSubTask = $task->subTasks()->count();
+
+        // Check if all subtasks of the task are completed
+        $completedSubTasks = $task->subTasks()->completed()->count();
+
+        // Get the maximum column_id of the project's columns
+        $completedProjectColumnId = $task->column->project->columns->max('id') - 1; #completed column
+
+
+        if ($completedSubTasks === $totalTaskSubTask && $task->column_id < $completedProjectColumnId) {
+            $task->update(['column_id' => $task->column_id + 1]);
+            $task->markAsCompleted();
+        }
+
+        if ($completedSubTasks === 1) {
+            $task->update(['column_id' => $task->column_id + 1]);
+        }
+    }
+
+
+    protected function revertMovedTask($taskId)
+    {
+        // Get the task by ID
+        $task = Task::with('column')->where('id', $taskId)->firstOrFail();
+
+        // Count the total number of subtasks for the task
+        $totalTaskSubTasks = $task->subTasks()->count();
+
+        // Count the completed subtasks
+        $completedSubTasks = $task->subTasks()->completed()->count();
+
+
+        // Get the maximum column_id of the project's columns
+        $completedProjectColumnId = $task->column->project->columns->max('id') - 1;
+        $minProjectColumnId = $task->column->project->columns->min('id');
+
+        // move back to in-progress
+        if ($completedSubTasks === $totalTaskSubTasks && $task->column_id === $completedProjectColumnId) {
+            $task->update(['column_id' => $task->column_id - 1, 'is_approved' => null]);
+            $task->markAsInCompleted();
+        }
+
+        // Check if all subtasks of the task are completed
+        if ($completedSubTasks === 0) {
+            // If no subtasks are completed, don't change the column
+            $task->update(['column_id' => $minProjectColumnId]);
+            $task->markAsIncompleted();
+        }
     }
 }
