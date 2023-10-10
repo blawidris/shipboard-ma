@@ -7,6 +7,7 @@ use App\Filters\Filterable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use phpDocumentor\Reflection\Types\This;
 
 class Project extends Model
 {
@@ -67,12 +68,14 @@ class Project extends Model
      */
     public function getStatusAttribute()
     {
-        if ($this->isNotStarted()) {
-            return 'not started';
-        }
+        // if (!$this->isNotStarted()) {
+        //     return 'not started';
+        // }
 
         if ($this->isOngoing()) {
             return 'ongoing';
+        } else {
+            return 'not started';
         }
 
         if ($this->isOverdue()) {
@@ -270,25 +273,25 @@ class Project extends Model
     public function isNotStarted()
     {
         // Check if the task has no end date or if the end date is in the future
-        $endDateIsFuture = optional($this->end_date)->isFuture() || $this->end_date === null;
+        // $endDateIsFuture = optional($this->end_date)->isFuture() || $this->end_date === null;
 
         // Check if the task is not completed
-        $notCompleted = $this->completed_at === null;
+        // $notCompleted = $this->completed_at === null;
 
         // Check if there are no uncompleted task or subtasks in the task's column
-        $hasCompletedTasksOrSubtask = $this->columns->flatMap(function ($column) {
+        $allCompleted = $this->columns->flatMap(function ($column) {
             return $column->tasks->flatMap(function ($task) {
-                return $task->tasks->whereNotNull('completed_at');
+                return $task->subTasks()->whereNull('completed_at');
             });
         })->isEmpty();
+
 
         // Check if the task is not trashed
         $notTrashed = !$this->trashed();
 
         // Return true if all conditions are met
-        return $endDateIsFuture && $notCompleted && $hasCompletedTasksOrSubtask  && $notTrashed;
+        return $allCompleted && $notTrashed;
     }
-
 
 
     /**
@@ -304,10 +307,18 @@ class Project extends Model
 
         $notTrashed = !$this->trashed();
 
+        // Check if there are any completed subtasks in the project
+        $hasCompletedSubtasks = $this->columns()->whereHas('tasks.subtasks', function ($query) {
+            $query->whereNotNull('completed_at');
+        })->exists();
+
+
         // Check if the task is not completed
         $notCompleted = $this->completed_at === null;
 
-        return $endDateIsFuture && $notCompleted && $notTrashed;
+        // return $endDateIsFuture && $notCompleted && $notTrashed
+
+        return  $endDateIsFuture && $notCompleted && $notTrashed && $hasCompletedSubtasks;
     }
 
     /**
@@ -317,7 +328,13 @@ class Project extends Model
      */
     public function isOverdue()
     {
-        return $this->end_date !== null &&
+        $overdue = $this->columns()->whereHas('tasks', function ($query) {
+            $query->where('due_date', '<', now());
+        })->orWhereHas('tasks.subtasks', function ($query) {
+            $query->where('due_date', '<', now());
+        })->exists();
+
+        return $this->end_date !== null && $overdue &&
             optional($this->end_date)->isPast() &&
             $this->completed_at === null &&
             !$this->trashed();
@@ -330,7 +347,12 @@ class Project extends Model
      */
     public function isCompleted()
     {
-        return $this->completed_at !== null && !$this->trashed();
+
+        $allCompleted = !$this->columns()->whereHas('tasks.subtasks', function ($query) {
+            $query->whereNull('completed_at');
+        })->exists();
+
+        return $this->completed_at !== null && $allCompleted && !$this->trashed();
     }
 
     /**
