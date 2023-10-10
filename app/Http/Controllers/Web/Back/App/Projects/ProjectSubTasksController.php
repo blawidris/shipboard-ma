@@ -231,7 +231,6 @@ class ProjectSubTasksController extends Controller
         // Get the maximum column_id of the project's columns
         $completedProjectColumnId = $task->column->project->columns->max('id') - 1; #completed column
 
-
         if ($completedSubTasks === $totalTaskSubTask && $task->column_id < $completedProjectColumnId) {
             $task->update(['column_id' => $task->column_id + 1]);
             $task->markAsCompleted();
@@ -259,17 +258,16 @@ class ProjectSubTasksController extends Controller
         $completedProjectColumnId = $task->column->project->columns->max('id') - 1;
         $minProjectColumnId = $task->column->project->columns->min('id');
 
+        // dd($completedProjectColumnId);
+
         // move back to in-progress
-        if ($completedSubTasks === $totalTaskSubTasks && $task->column_id === $completedProjectColumnId) {
+        if ($task->isCompleted() && $task->column_id === $completedProjectColumnId && $totalTaskSubTasks === $completedSubTasks) {
             $task->update(['column_id' => $task->column_id - 1, 'is_approved' => null]);
             $task->markAsInCompleted();
         }
 
-        // Check if all subtasks of the task are completed
-        if ($completedSubTasks === 0) {
-            // If no subtasks are completed, don't change the column
+        if (!$task->isCompleted() &&  $completedSubTasks < $totalTaskSubTasks || $completedSubTasks === 0) {
             $task->update(['column_id' => $minProjectColumnId]);
-            $task->markAsIncompleted();
         }
     }
 }
