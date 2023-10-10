@@ -64,15 +64,16 @@
                                 </path>
                             </svg>
 
-                            <span v-if="task.start_date">{{ task.due_date }}</span>
-                            <span v-if="task.due_date">{{ task.due_date }}</span>
-                            <span v-else>{{ $trans('labels.due-date') }}</span>
+                            {{ task.start_date }}
+                            <span v-if="task.start_date">{{ task.start_date }}</span>
+                            <!-- <span v-if="task.due_date">{{ task.due_date }}</span> -->
+                            <span v-else>{{ $trans('labels.start_date') }}</span>
                         </a>
                     </template>
 
                     <template v-slot:content>
+                        <!-- <v-input-date inline v-model="task.start_date" @input="updateTask()" /> -->
                         <v-input-date inline v-model="task.start_date" @input="updateTask()" />
-                        <v-input-date inline v-model="task.due_date" @input="updateTask()" />
                     </template>
                 </v-dropdown>
 
@@ -166,6 +167,11 @@ export default {
         dueDate: {
             type: String,
             default: null
+        },
+
+        startDate: {
+            type: String,
+            default: null
         }
     },
 
@@ -177,6 +183,7 @@ export default {
                 is_completed: this.isCompleted,
                 is_approved: this.isApproved,
                 user_uuid: this.userUuid,
+                start_date: this.startDate,
                 due_date: this.dueDate,
                 priority: this.priority
             })
@@ -224,6 +231,7 @@ export default {
             }), {
                 'content': this.task.content,
                 'due_date': this.task.due_date,
+                'start_date': this.task.start_date,
                 'is_completed': this.task.is_completed,
                 'is_approved': this.task.is_approved,
                 'user_uuid': this.task.user_uuid,

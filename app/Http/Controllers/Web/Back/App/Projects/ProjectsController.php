@@ -324,6 +324,7 @@ class ProjectsController extends Controller
                                 'content'      => $task->content,
                                 'index'        => $task->index,
                                 'due_date'     => optional($task->due_date)->format('Y-m-d'),
+                                'start_date'     => optional($task->start_date)->format('Y-m-d'),
                                 'priority'     => $task->priority,
                                 'is_completed' => $task->isCompleted(),
                                 'is_approved'  => strval($task->isApproved()),

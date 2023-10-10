@@ -34,7 +34,7 @@
         </span>
 
         <div class="flex items-center text-xs justify-between text-gray-500 px-4 pb-4"
-            v-if="task.due_date || task.sub_tasks.total || task.user.name !== null">
+            v-if="task.start_date || task.sub_tasks.total || task.user.name !== null">
             <div class="flex items-center -mx-3">
                 <div class="px-3"
                     :class="{ 'text-red-700': task.priority === 4, 'text-orange-500': task.priority === 3, 'text-blue-500': task.priority === 2 }"
@@ -44,7 +44,7 @@
                     </svg>
                 </div>
 
-                <div class="flex items-center px-3" v-if="task.due_date">
+                <!-- <div class="flex items-center px-3" v-if="task.due_date">
                     <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current mr-1.5">
                         <path
                             d="M1 4c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4zm2 2v12h14V6H3zm2-6h2v2H5V0zm8 0h2v2h-2V0zM5 9h2v2H5V9zm0 4h2v2H5v-2zm4-4h2v2H9V9zm0 4h2v2H9v-2zm4-4h2v2h-2V9zm0 4h2v2h-2v-2z">
@@ -52,6 +52,15 @@
                     </svg>
 
                     {{ task.due_date }}
+                </div> -->
+                <div class="flex items-center px-3" v-if="task.start_date">
+                    <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current mr-1.5">
+                        <path
+                            d="M1 4c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4zm2 2v12h14V6H3zm2-6h2v2H5V0zm8 0h2v2h-2V0zM5 9h2v2H5V9zm0 4h2v2H5v-2zm4-4h2v2H9V9zm0 4h2v2H9v-2zm4-4h2v2h-2V9zm0 4h2v2h-2v-2z">
+                        </path>
+                    </svg>
+
+                    {{ task.start_date }}
                 </div>
 
                 <div class="flex items-center px-3" v-if="task.sub_tasks.total > 0">

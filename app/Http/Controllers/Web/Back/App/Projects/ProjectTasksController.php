@@ -88,6 +88,7 @@ class ProjectTasksController extends Controller
         $task->update([
             'content'  => $request->input('content'),
             'due_date' => $request->input('due_date'),
+            'start_date' => $request->input('start_date'),
             'priority' => $request->input('priority'),
         ]);
 
