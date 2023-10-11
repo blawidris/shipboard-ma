@@ -306,4 +306,54 @@ class Task extends Model
     {
         return $this->hasMany(Activity::class);
     }
+
+
+    public function isNotStarted()
+    {
+
+
+        $taskNotCompleted = $this->completed_at === null;
+
+        // check if all subtask has not been completed
+        $allCompletedSubTask = $this->whereHas('subtasks', function ($query) {
+            $query->where('completed_at', null);
+        })->exist();
+
+        return $allCompletedSubTask && $taskNotCompleted;
+    }
+
+    public function isOngoing()
+    {
+        $taskNotCompleted = $this->completed_at === null;
+        $endDateIsFuture = optional($this->due_date)->isFuture() || $this->due_date === null;
+        $allCompletedSubTask = $this->subTasks()->where('completed_at', '<', now())->exists();
+
+        // dd($allCompletedSubTask);
+
+        return $taskNotCompleted && $endDateIsFuture && $allCompletedSubTask;
+    }
+
+    public function isOverDue()
+    {
+        $allCompletedSubtask = $this->subTasks()->whereNotNull('completed_at');
+    }
+
+    public function getStatusAttribute($key)
+    {
+        if ($this->isOngoing()) {
+            return 'ongoing';
+        } else {
+            return 'pending';
+        }
+
+
+        if ($this->isOverdue()) {
+            return 'overdue';
+        }
+
+        if ($this->isCompleted()) {
+
+            return 'completed';
+        }
+    }
 }

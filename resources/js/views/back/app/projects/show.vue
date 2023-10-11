@@ -45,7 +45,8 @@
 
                                 <inertia-link :href="route('app:projects.complete.store', { project: project.uuid })"
                                     class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
-                                    method="post" v-else-if="!project.is_completed && project.status !== 'archived' && $page.user.role !== 3">
+                                    method="post"
+                                    v-else-if="!project.is_completed && project.status !== 'archived' && $page.user.role !== 3">
                                     {{ $trans('labels.mark-as-completed') }}
                                 </inertia-link>
 
@@ -173,11 +174,16 @@ export default {
                 projectUuid: this.project.uuid,
                 taskUuid: task.uuid,
                 userUuid: task.user.uuid,
+                user_role: this.$page.user.role,
                 content: task.content,
                 isCompleted: task.is_completed,
                 dueDate: task.due_date,
+                startDate: task.start_date,
+                status: task.status,
                 priority: task.priority,
             });
+
+            // console.log(task.status)
         },
 
         showAddColumnModal() {

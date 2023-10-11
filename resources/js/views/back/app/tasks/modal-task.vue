@@ -4,14 +4,31 @@
             <div class="flex items-center px-6 pt-6 pb-4">
                 <div>
                     <input type="checkbox" class="form-checkbox w-6 h-6 rounded-full text-green-400"
-                        v-model="task.is_completed" @change="updateTask()">
+                        v-model="task.is_completed" @change="updateTask()" v-if="task.is_completed">
                 </div>
 
-                <div class="pl-3 w-full">
-                    <v-input-text-editable v-model="task.content" @input="updateTask()" />
+                <div class="pl-3 flex-1 flex items-center gap-x-2">
+                    <v-input-text-editable v-model="task.content" @input="updateTask()" v-if="$page.user.role !== 3" />
+                    <div class="text-xl font-medium text-gray-900" v-else>{{ task.content }}</div>
+                    <div v-if="$page.user.role == 3">
+                        -
+                        <span class="badge badge-yellow" v-if="status === 'pending'">
+                            {{ $trans('labels.not-started') }}
+                        </span>
+                        <span class="badge badge-indigo" v-if="status === 'ongoing'">{{
+                            $trans('labels.ongoing') }}
+                        </span>
+                        <span class="badge badge-red" v-else-if="status === 'overdue'">{{
+                            $trans('labels.overdue') }}</span>
+                        <span class="badge badge-green" v-else-if="status === 'completed' && approved === '1'">{{
+                            $trans('labels.completed') }}</span>
+                        <span class="badge badge-yellow" v-else-if="status === 'completed' && approved !== '1'">{{
+                            $trans('labels.pending') }}
+                        </span>
+                    </div>
                 </div>
 
-                <div class="pl-3 flex items-center">
+                <div class="pl-3 flex items-center flex-shrink-0">
                     <v-dropdown>
                         <template v-slot:button v-if="$page.user.role !== 3">
                             <button class="btn btn-sm btn-flat">
@@ -52,7 +69,7 @@
                 </div>
             </div>
 
-            <div class="flex items-center px-6 pb-6 pr-6">
+            <div class="flex items-center px-6 pb-6 pr-6 gap-x-2">
                 <v-select-user :users="users" v-model="task.user_uuid" @input="updateTask()" />
 
                 <v-dropdown placement="left-0">
@@ -66,7 +83,6 @@
 
                             {{ task.start_date }}
                             <span v-if="task.start_date">{{ task.start_date }}</span>
-                            <!-- <span v-if="task.due_date">{{ task.due_date }}</span> -->
                             <span v-else>{{ $trans('labels.start_date') }}</span>
                         </a>
                     </template>
@@ -77,7 +93,45 @@
                     </template>
                 </v-dropdown>
 
+                <v-dropdown placement="left-0">
+                    <template v-slot:button>
+                        <a href="#" class="flex items-center text-xs text-gray-600 pl-6 hover:underline">
+                            <svg class="w-4 h-4 mr-1.5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path
+                                    d="M1 4c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4zm2 2v12h14V6H3zm2-6h2v2H5V0zm8 0h2v2h-2V0zM5 9h2v2H5V9zm0 4h2v2H5v-2zm4-4h2v2H9V9zm0 4h2v2H9v-2zm4-4h2v2h-2V9zm0 4h2v2h-2v-2z">
+                                </path>
+                            </svg>
+
+                            {{ task.due_date }}
+                            <span v-if="task.due_date">{{ task.due_date }}</span>
+                            <span v-else>{{ $trans('labels.due_date') }}</span>
+                        </a>
+                    </template>
+
+                    <template v-slot:content>
+                        <!-- <v-input-date inline v-model="task.start_date" @input="updateTask()" /> -->
+                        <v-input-date inline v-model="task.start_date" @input="updateTask()" />
+                    </template>
+                </v-dropdown>
+
                 <v-select-task-priority v-model="task.priority" @input="updateTask()" />
+
+
+                <div v-if="$page.user.role !== 3" class="pl-3">
+                    <span class="badge badge-yellow" v-if="status === 'pending'">
+                        {{ $trans('labels.not-started') }}
+                    </span>
+                    <span class="badge badge-indigo" v-if="status === 'ongoing'">{{
+                        $trans('labels.ongoing') }}
+                    </span>
+                    <span class="badge badge-red" v-else-if="status === 'overdue'">{{
+                        $trans('labels.overdue') }}</span>
+                    <span class="badge badge-green" v-else-if="status === 'completed' && approved === '1'">{{
+                        $trans('labels.completed') }}</span>
+                    <span class="badge badge-yellow" v-else-if="status === 'completed' && approved !== '1'">{{
+                        $trans('labels.pending') }}
+                    </span>
+                </div>
             </div>
 
             <div class="px-6" v-if="$page.errors.has('plan.limit')">
@@ -168,7 +222,14 @@ export default {
             type: String,
             default: null
         },
-
+        status: {
+            type: String,
+            default: null
+        },
+        is_not_applicable: {
+            type: Boolean,
+            default: false
+        },
         startDate: {
             type: String,
             default: null

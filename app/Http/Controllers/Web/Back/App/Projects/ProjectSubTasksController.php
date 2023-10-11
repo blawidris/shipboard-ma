@@ -47,6 +47,7 @@ class ProjectSubTasksController extends Controller
                 'due_date'     => $task->due_date,
                 'priority'     => $task->priority,
                 'is_completed' => $task->isCompleted(),
+                'is_not_applicable' => $task->is_not_applicable,
                 'user'         => [
                     'uuid'       => optional($task->user)->uuid,
                     'name'       => optional($task->user)->name,
@@ -118,12 +119,16 @@ class ProjectSubTasksController extends Controller
         $subtask->update([
             'content'  => $request->input('content'),
             'due_date' => $request->input('due_date'),
+            'is_applicable' => true,
         ]);
 
+        dd($request->is_not_applicable);
 
         $this->updateAssignedTaskUser($subtask, $request);
 
         $this->updateSubTaskStatus($subtask, $request);
+
+        $this->updateIsApplicable($subtask, $request);
 
         return back();
     }
@@ -181,6 +186,14 @@ class ProjectSubTasksController extends Controller
         return $subtask->unassignUser();
     }
 
+    protected function updateIsApplicable($subTask, $request)
+    {
+        if ($request->input('is_applicable')) {
+            $subTask->update([
+                'is_not_applicable' => true
+            ]);
+        }
+    }
     protected function updateSubTaskStatus($subtask, $request)
     {
 
