@@ -223,7 +223,7 @@ class ProjectsController extends Controller
 
         $data = [
             'filters'  => request()->all('visibility', 'status', 'search'),
-            'users'    => User::orderBy('name')->get()->map->only(['uuid', 'name', 'email', 'avatar_url', 'role']),
+            'users'    => User::orderBy('name')->get()->map->only(['uuid', 'name', 'email', 'avatar_url', 'role', 'job_title']),
             'notification'        => [
                 'total_count' => 0,
                 'list' => []
@@ -286,7 +286,7 @@ class ProjectsController extends Controller
         });
 
         $data = [
-            'users'   => User::orderBy('id')->get()->map->only(['uuid', 'name', 'email', 'avatar_url', 'role']),
+            'users'   => User::orderBy('id')->get()->map->only(['uuid', 'name', 'email', 'avatar_url', 'role', 'job_title']),
             'can'     => [
                 'update_project'  => auth()->user()->can('update', $project),
                 'archive_project' => auth()->user()->can('delete', $project),
@@ -319,21 +319,22 @@ class ProjectsController extends Controller
                         'tasks' => $column->tasks()->get()->sortBy('id')->transform(function ($task) {
                             // 'tasks' => $column->tasks()->mainTasks()->get()->sortBy('id')->transform(function ($task) {
                             return [
-                                'id'           => $task->id,
-                                'uuid'         => $task->uuid,
-                                'content'      => $task->content,
-                                'index'        => $task->index,
-                                'due_date'     => optional($task->due_date)->format('Y-m-d'),
+                                'id'             => $task->id,
+                                'uuid'           => $task->uuid,
+                                'content'        => $task->content,
+                                'index'          => $task->index,
+                                'due_date'       => optional($task->due_date)->format('Y-m-d'),
                                 'start_date'     => optional($task->start_date)->format('Y-m-d'),
-                                'priority'     => $task->priority,
-                                'is_completed' => $task->isCompleted(),
-                                'is_approved'  => strval($task->isApproved()),
-                                'user'         => [
+                                'priority'       => $task->priority,
+                                'is_completed'   => $task->isCompleted(),
+                                'is_approved'    => strval($task->isApproved()),
+                                'activity'       => $task->activities()->get()->only(['comment', '']),
+                                'user'           => [
                                     'uuid'       => optional($task->user)->uuid,
                                     'name'       => optional($task->user)->name,
                                     'avatar_url' => optional($task->user)->avatar_url,
                                 ],
-                                'sub_tasks'    => [
+                                'sub_tasks'      => [
                                     // 'total'     => $task->tasks()->subTasks()->count(),
                                     'total'     => $task->subTasks()->count(),
                                     'completed' => $task->subTasks()->completed()->count(),

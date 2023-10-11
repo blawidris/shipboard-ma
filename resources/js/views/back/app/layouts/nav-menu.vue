@@ -22,7 +22,7 @@
                         <p
                             class="text-xs leading-4 font-medium text-gray-400 group-hover:text-gray-300 group-focus:underline transition ease-in-out duration-150">
                             <!-- {{ $trans('labels.profile-settings') }} -->
-                            {{ $page.user.role === 3 ? 'Team Member' : 'Manager' }}
+                            {{ $page.user.job_title }}
                         </p>
                     </div>
                 </div>

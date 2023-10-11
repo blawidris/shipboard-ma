@@ -28,7 +28,7 @@ class CalendarController extends Controller
     {
 
         $data = [
-            'users'  => User::orderBy('name')->get()->map->only(['uuid', 'name', 'avatar_url']),
+            'users'  => User::orderBy('name')->get()->map->only(['uuid', 'name', 'avatar_url', 'role', 'job_title']),
             'events' => auth()->user()->tasks()
                 ->mainTasks()
                 ->whereHas('column.project', function ($query) {
@@ -61,7 +61,7 @@ class CalendarController extends Controller
             return $notice;
         });
 
-        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email']);
+        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email', 'job_title']);
 
         if (auth()->user()->role !== 3 || auth()->user()->isWatcher) {
             $data['notification'] = [

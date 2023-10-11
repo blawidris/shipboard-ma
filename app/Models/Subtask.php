@@ -115,4 +115,12 @@ class Subtask extends Model
     {
         return $this->completed_at !== null;
     }
+
+
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    
 }

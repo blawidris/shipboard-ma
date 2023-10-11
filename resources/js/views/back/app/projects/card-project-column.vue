@@ -2,7 +2,7 @@
     <div class="column max-w-xs w-full flex-shrink-0 rounded-lg mr-3">
         <div class="flex flex-col h-full rounded-lg shadow-sm bg-gray-200">
             <div class="flex items-center">
-                <span class="font-bold text-sm text-gray-700 truncate px-4 py-4">{{ column.name }}</span>
+                <span class="font-bold text-sm text-gray-700 truncate px-4 py-4 capitalize">{{ column.name }}</span>
 
                 <div class="ml-auto flex items-center pr-3" v-if="$page.user.role !== 3">
                     <button @click="showAddTaskForm()"

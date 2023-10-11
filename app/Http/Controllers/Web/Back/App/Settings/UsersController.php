@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Web\Back\App\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use App\Models\User;
+use App\Notifications\Settings\NotifyNewMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Notification;
 
 class UsersController extends Controller
 {
@@ -53,7 +55,9 @@ class UsersController extends Controller
             ];
         }
 
-        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email']);
+        // dd($data['users']);
+
+        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email', 'job_title']);
 
         return Inertia::render('back/app/settings/users/index', $data);
     }
@@ -74,18 +78,23 @@ class UsersController extends Controller
             'role'          => ['required'],
             'phone'         => ['required'],
             'department'    => ['required'],
+            'job_title'    => ['required'],
 
         ]);
 
-        User::create([
+        $newUser = User::create([
             'name'        => $request->input('name'),
             'email'       => $request->input('email'),
             'password'    => bcrypt($request->input('password')),
-            'department'  => bcrypt($request->input('department')),
-            'phone'  => bcrypt($request->input('phone')),
+            'department'  => $request->input('department'),
+            'job_title'  => $request->input('job_title'),
+            'phone'  => $request->input('phone'),
             'role'      => $request->input('role') === 'admin' ? User::ROLE_TENANT_OWNER : User::ROLE_TENANT_USER,
             'tenant_id' => auth()->user()->tenant->id,
         ]);
+
+        // send email to newly added team member
+        Notification::send($newUser, new NotifyNewMember($request));
 
         session()->flash('message', __('app.messages.user-created'));
 
@@ -106,6 +115,7 @@ class UsersController extends Controller
             'email' => ['required', 'email', Rule::unique('users')->ignore($request->user, 'uuid')],
             'role'  => ['required'],
             'department' => 'required',
+            'job_title' => 'required',
             'phone' => 'required',
         ]);
 
@@ -122,6 +132,7 @@ class UsersController extends Controller
             'email' => $request->input('email'),
             'phone' => $request->input('phone'),
             'department' => $request->input('department'),
+            'job_title' => $request->input('job_title'),
             'role'  => $request->input('role') == 'admin' ? User::ROLE_TENANT_OWNER : User::ROLE_TENANT_USER,
         ]);
 

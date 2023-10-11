@@ -62,7 +62,7 @@ class BillingInformationController extends Controller
             ];
         }
 
-        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email']);
+        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email', 'job_title']);
 
         return Inertia::render('back/app/settings/billing-information/edit', $data);
     }

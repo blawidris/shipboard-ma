@@ -53,6 +53,8 @@ class TaskCommentsController extends Controller
                     'uuid'       => $comment->user->uuid,
                     'name'       => $comment->user->name,
                     'avatar_url' => $comment->user->avatar_url,
+                    'role'       => $comment->user->role,
+                    'job_title' => $comment->user->job_title,
                 ],
             ];
         })->values();

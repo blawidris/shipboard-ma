@@ -41,7 +41,7 @@ class TasksController extends Controller
         $data = [
             'tasks'    => $this->getUserTasks($filters),
             'count'    => auth()->user()->tasks->count(),
-            'users'    => User::orderBy('name')->get()->map->only(['uuid', 'name', 'avatar_url', 'role',]),
+            'users'    => User::orderBy('name')->get()->map->only(['uuid', 'name', 'avatar_url', 'role','job_title']),
             'projects' => $this->getUserProjects(),
             'notification'        => [
                 'total_count' => 0,
@@ -49,7 +49,7 @@ class TasksController extends Controller
             ],
         ];
 
-        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email']);
+        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email', 'job_title']);
 
         if (auth()->user()->role !== 3 || auth()->user()->isWatcher) {
             $data['notification'] = [

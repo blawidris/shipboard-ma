@@ -73,7 +73,8 @@ class DashboardController extends Controller
             'email' => auth()->user()->email,
             'role' => auth()->user()->role,
             'name' => auth()->user()->name,
-            'avatar_url' => auth()->user()->getAvatarUrlAttribute()
+            'avatar_url' => auth()->user()->getAvatarUrlAttribute(),
+            'job_title' => auth()->user()->job_title
         ];
 
 

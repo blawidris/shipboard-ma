@@ -295,10 +295,15 @@ class Task extends Model
         if ($this->completed_at) {
 
             $this->subtasks()->whereNotNull('completed_at')->update(['completed_at' => null]);
-            
+
             return tap($this->update(['completed_at' => null, 'is_approved' => null, 'column_id' => ($this->column->project->columns->min('id'))]), function () {
                 event(new TaskStatusChanged($this));
             });
         }
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
     }
 }
