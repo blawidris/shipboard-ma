@@ -119,10 +119,9 @@ class ProjectSubTasksController extends Controller
         $subtask->update([
             'content'  => $request->input('content'),
             'due_date' => $request->input('due_date'),
-            'is_applicable' => true,
         ]);
 
-        dd($request->is_not_applicable);
+        // dd($request->is_not_applicable);
 
         $this->updateAssignedTaskUser($subtask, $request);
 
@@ -188,11 +187,17 @@ class ProjectSubTasksController extends Controller
 
     protected function updateIsApplicable($subTask, $request)
     {
-        if ($request->input('is_applicable')) {
-            $subTask->update([
+        if ($request->input('is_not_applicable')) {
+            $updateNotAp =  $subTask->update([
                 'is_not_applicable' => true
             ]);
+
+            return $updateNotAp;
         }
+
+        return $updateNotAp =  $subTask->update([
+            'is_not_applicable' => false
+        ]);
     }
     protected function updateSubTaskStatus($subtask, $request)
     {
@@ -223,8 +228,8 @@ class ProjectSubTasksController extends Controller
             return $isCompleted;
         }
 
-        $this->revertMovedTask($subtask->task->id);
         $inCompleted = $subtask->markAsIncompleted();
+        $this->revertMovedTask($subtask->task->id);
 
         return $inCompleted;
     }
@@ -274,12 +279,12 @@ class ProjectSubTasksController extends Controller
         // dd($completedProjectColumnId);
 
         // move back to in-progress
-        if ($task->isCompleted() && $task->column_id === $completedProjectColumnId && $totalTaskSubTasks === $completedSubTasks) {
+        if (!$task->isCompleted() && $task->column_id === $completedProjectColumnId && $totalTaskSubTasks === $completedSubTasks) {
             $task->update(['column_id' => $task->column_id - 1, 'is_approved' => null]);
-            $task->markAsInCompleted();
+            // $task->markAsInCompleted();
         }
 
-        if (!$task->isCompleted() &&  $completedSubTasks < $totalTaskSubTasks || $completedSubTasks === 0) {
+        if ($completedSubTasks === 0) {
             $task->update(['column_id' => $minProjectColumnId]);
         }
     }

@@ -18,6 +18,9 @@
                         <span class="badge badge-indigo" v-if="status === 'ongoing'">{{
                             $trans('labels.ongoing') }}
                         </span>
+                        <span class="badge badge-orange" v-if="status === 'review'">{{
+                            $trans('labels.review') }}
+                        </span>
                         <span class="badge badge-red" v-else-if="status === 'overdue'">{{
                             $trans('labels.overdue') }}</span>
                         <span class="badge badge-green" v-else-if="status === 'completed' && approved === '1'">{{
@@ -124,6 +127,11 @@
                     <span class="badge badge-indigo" v-if="status === 'ongoing'">{{
                         $trans('labels.ongoing') }}
                     </span>
+
+                    <span class="badge badge-indigo" v-if="status === 'review'">{{
+                        $trans('labels.review') }}
+                    </span>
+                    
                     <span class="badge badge-red" v-else-if="status === 'overdue'">{{
                         $trans('labels.overdue') }}</span>
                     <span class="badge badge-green" v-else-if="status === 'completed' && approved === '1'">{{

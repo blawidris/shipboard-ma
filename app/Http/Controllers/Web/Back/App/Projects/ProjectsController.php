@@ -252,7 +252,7 @@ class ProjectsController extends Controller
                 })
         ];
 
-        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email']);
+        $data['user'] = auth()->user()->only(['uuid', 'name', 'avatar_url', 'role', 'email', 'job_title']);
 
         if (auth()->user()->role === 2) {
             $data['notification'] = [
@@ -285,6 +285,24 @@ class ProjectsController extends Controller
             return $notice;
         });
 
+        $subtaskCount = $project->columns->sortBy('index')->flatMap(function ($column) {
+            return $column->tasks()->get()->sortBy('id')->flatmap(function ($task) {
+                return $task->subTasks()->get();
+            });
+        })->count();
+
+        $completeSubtaskCount = $project->columns->sortBy('index')->flatMap(function ($column) {
+            return $column->tasks()->get()->sortBy('id')->flatmap(function ($task) {
+                return $task->subTasks()->where('completed_at', '<', now())->get();
+            });
+        })->count();
+
+        // $subtaskCount = $project->tasks()->subTasks()->get()->count();
+
+        // dd(
+        //     $completeSubtaskCount
+        // );
+
         $data = [
             'users'   => User::orderBy('id')->get()->map->only(['uuid', 'name', 'email', 'avatar_url', 'role', 'job_title']),
             'can'     => [
@@ -310,6 +328,13 @@ class ProjectsController extends Controller
                 'is_completed' => $project->isCompleted(),
                 'is_approved'  => strval($project->isApproved()),
                 'is_watched'   => $project->isWatched(),
+                'stats'        => [
+                    'total_tasks' => $project->tasks()->count(),
+                    'open_tasks' => $project->tasks()->inComplete()->count(),
+                    'completed_tasks' => $project->tasks()->completed()->count(),
+                    'total_subtasks' => $subtaskCount,
+                    'completed_subtasks' => $completeSubtaskCount,
+                ],
                 'columns'      => $project->columns->sortBy('index')->map(function ($column) {
                     return [
 
@@ -351,7 +376,7 @@ class ProjectsController extends Controller
                 'total_count' => 0,
                 'list' => []
             ],
-            'user' => auth()->user()->only(['name', 'email', 'role', 'uuid', 'avatar_url'])
+            'user' => auth()->user()->only(['name', 'email', 'role', 'uuid', 'avatar_url', 'job_title'])
         ];
 
         if (auth()->user()->role !== 3 || auth()->user()->isWatcher) {

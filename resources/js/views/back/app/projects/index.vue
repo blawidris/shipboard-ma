@@ -9,6 +9,9 @@
                 <v-breadcrumb-item :lastItem="true" :title="$trans('headings.projects')" />
             </v-breadcrumb-layout>
 
+            
+
+
             <div class="container mx-auto flex flex-col flex-1 px-4 sm:px-6 md:px-8 py-4">
                 <v-alert v-if="$page.flash" dismissible>{{ $page.flash }}</v-alert>
 
