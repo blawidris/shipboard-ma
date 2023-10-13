@@ -83,8 +83,6 @@
                                     d="M1 4c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4zm2 2v12h14V6H3zm2-6h2v2H5V0zm8 0h2v2h-2V0zM5 9h2v2H5V9zm0 4h2v2H5v-2zm4-4h2v2H9V9zm0 4h2v2H9v-2zm4-4h2v2h-2V9zm0 4h2v2h-2v-2z">
                                 </path>
                             </svg>
-
-                            {{ task.start_date }}
                             <span v-if="task.start_date">{{ task.start_date }}</span>
                             <span v-else>{{ $trans('labels.start_date') }}</span>
                         </a>
@@ -104,8 +102,6 @@
                                     d="M1 4c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4zm2 2v12h14V6H3zm2-6h2v2H5V0zm8 0h2v2h-2V0zM5 9h2v2H5V9zm0 4h2v2H5v-2zm4-4h2v2H9V9zm0 4h2v2H9v-2zm4-4h2v2h-2V9zm0 4h2v2h-2v-2z">
                                 </path>
                             </svg>
-
-                            {{ task.due_date }}
                             <span v-if="task.due_date">{{ task.due_date }}</span>
                             <span v-else>{{ $trans('labels.due_date') }}</span>
                         </a>
@@ -113,7 +109,7 @@
 
                     <template v-slot:content>
                         <!-- <v-input-date inline v-model="task.start_date" @input="updateTask()" /> -->
-                        <v-input-date inline v-model="task.start_date" @input="updateTask()" />
+                        <v-input-date inline v-model="task.due_date" @input="updateTask()" />
                     </template>
                 </v-dropdown>
 
@@ -131,7 +127,7 @@
                     <span class="badge badge-indigo" v-if="status === 'review'">{{
                         $trans('labels.review') }}
                     </span>
-                    
+
                     <span class="badge badge-red" v-else-if="status === 'overdue'">{{
                         $trans('labels.overdue') }}</span>
                     <span class="badge badge-green" v-else-if="status === 'completed' && approved === '1'">{{

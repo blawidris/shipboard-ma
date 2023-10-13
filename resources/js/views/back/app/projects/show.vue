@@ -1,5 +1,5 @@
 <template>
-    <v-app-default-layout>
+    <v-app-default-layout class="">
         <template v-slot:header>
             <h1 class="text-2xl font-semibold text-gray-900">{{ project.name }}</h1>
 
@@ -105,7 +105,7 @@
         </div>
 
         <template>
-            <div class="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5 mb-8 mx-auto container pl-8">
+            <div class="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-5 mb-8 mx-auto container px-4 lg:pl-8">
 
                 <div class="bg-white overflow-hidden shadow rounded-lg">
                     <div class="px-3 py-5 sm:p-6">
