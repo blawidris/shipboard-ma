@@ -239,7 +239,7 @@ class ProjectsController extends Controller
                         'name'          => $project->name,
                         'description'   => $project->description,
                         'status'        => $project->status,
-                        'approved'        => strVal($project->is_approved),
+                        'approved'      => strVal($project->is_approved),
                         'pending_tasks' => $project->tasks()->pending()->where('task_id', null)->count(),
                         'days_left'     => $project->days_left,
                         'team_members'  => $project->teamMembers->transform(function ($user) {
@@ -341,6 +341,7 @@ class ProjectsController extends Controller
                         'uuid'  => $column->uuid,
                         'name'  => $column->name,
                         'index' => $column->index,
+
                         'tasks' => $column->tasks()->get()->sortBy('id')->transform(function ($task) {
                             // 'tasks' => $column->tasks()->mainTasks()->get()->sortBy('id')->transform(function ($task) {
                             return [
@@ -348,12 +349,13 @@ class ProjectsController extends Controller
                                 'uuid'           => $task->uuid,
                                 'content'        => $task->content,
                                 'index'          => $task->index,
+                                'minId'         => $task->min('id'),
                                 'due_date'       => optional($task->due_date)->format('Y-m-d'),
                                 'start_date'     => optional($task->start_date)->format('Y-m-d'),
                                 'status'         => $task->status,
                                 'priority'       => $task->priority,
-                                'is_completed'   => $task->isCompleted(),
-                                'is_approved'    => strval($task->isApproved()),
+                                'is_completed'   => $task->completed_at ? true : false,
+                                'is_approved'    => $task->is_approved ? true : false,
                                 'activity'       => $task->activities()->get()->only(['comment', '']),
                                 'user'           => [
                                     'uuid'       => optional($task->user)->uuid,
@@ -594,7 +596,7 @@ class ProjectsController extends Controller
     protected function createColumn($project)
     {
 
-        $columns = ['not started', 'in progress', 'review', 'completed', 'overdue'];
+        $columns = ['not started', 'in progress', 'review', 'overdue', 'delayed', 'completed'];
 
         foreach ($columns as $column) {
             $project->columns()->create([

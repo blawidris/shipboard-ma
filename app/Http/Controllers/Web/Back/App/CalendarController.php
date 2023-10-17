@@ -39,8 +39,8 @@ class CalendarController extends Controller
                     return [
                         'uuid'         => $task->uuid,
                         'title'        => $task->content,
-                        'start'        => $task->start_date,
-                        'end'           => $task->due_date,
+                        'start'        => date('Y-m-d H:i:s', strtotime($task->start_date)),
+                        'end'          => date('Y-m-d H:i:s', strtotime($task->due_date)),
                         'project_uuid' => $task->column->project->uuid,
                         'color'        => $task->column->project->color,
                         'is_completed' => $task->isCompleted(),

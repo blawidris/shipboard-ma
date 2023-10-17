@@ -111,9 +111,8 @@ export default {
                 due_date: this.task.due_date,
                 is_completed: this.task.is_completed,
                 user_uuid: this.task.user.uuid,
-                is_not_applicable: this.is_not_applicable
+                applicable: this.applicable
             },
-            comment: false
         }
     },
 
@@ -127,7 +126,7 @@ export default {
                 'due_date': this.form.due_date,
                 'is_completed': this.form.is_completed,
                 'user_uuid': this.form.user_uuid,
-                'is_not_applicable': this.form.is_not_applicable,
+                'applicable': this.form.applicable,
             }).then(() => {
                 this.$emit('updated')
             });

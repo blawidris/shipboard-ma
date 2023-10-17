@@ -9,6 +9,7 @@ return [
         'month'                        => 'Monthly',
         'week'                         => 'Weekly',
         'day'                          => 'Daily',
+        'list'                          => 'List',
         'create-new-account'           => 'Create new account',
         'remember-me'                  => 'Remember me',
         'forgot-your-password'         => 'Forgot your password?',

@@ -256,7 +256,7 @@
                 v-bind="{ fallbackTolerance: 7 }" @end="onColumnSortChange">
                 <v-card-project-column :key="column.uuid" :column="column" @task-click="showTaskModal"
                     @tasks-sort-change="onTasksSortChange" @column-edit="showEditColumnModal"
-                    @column-delete="showDeleteColumnModal" v-for="column in $page.project.columns" />
+                    @column-delete="showDeleteColumnModal" v-for="column in $page.project.columns"  />
 
                 <div class="max-w-xs w-full flex-shrink-0 rounded-lg px-2">
                     <div class="flex flex-col h-full rounded-lg">
@@ -323,13 +323,14 @@ export default {
                 user_role: this.$page.user.role,
                 content: task.content,
                 isCompleted: task.is_completed,
+                isApproved: task.is_approved,
                 dueDate: task.due_date,
                 startDate: task.start_date,
                 status: task.status,
                 priority: task.priority,
             });
 
-            // console.log(task.status)
+            //  console.log()
         },
 
         showAddColumnModal() {
@@ -414,6 +415,7 @@ export default {
         },
 
         sortTasks(columnUuid) {
+
             let columnIndex = this.project.columns.findIndex(c => c.uuid === columnUuid);
             let index = this.project.columns[columnIndex].tasks.length - 1;
 

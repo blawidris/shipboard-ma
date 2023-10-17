@@ -126,7 +126,7 @@ class ProjectTasksController extends Controller
 
         $task->update([
             'is_approved' => 1,
-            'column_id' => ($task->column->project->columns->max('id') - 1)
+            'column_id' => (int)$task->column->project->columns->max('id')
         ]);
 
 

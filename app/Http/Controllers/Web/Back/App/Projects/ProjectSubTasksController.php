@@ -45,9 +45,9 @@ class ProjectSubTasksController extends Controller
                 'uuid'         => $task->uuid,
                 'content'      => $task->content,
                 'due_date'     => $task->due_date,
-                'priority'     => $task->priority,
+                // 'priority'     => $task->priority,
                 'is_completed' => $task->isCompleted(),
-                'is_not_applicable' => $task->is_not_applicable,
+                'applicable'   => $task->isApplicable(),
                 'user'         => [
                     'uuid'       => optional($task->user)->uuid,
                     'name'       => optional($task->user)->name,
@@ -187,18 +187,14 @@ class ProjectSubTasksController extends Controller
 
     protected function updateIsApplicable($subTask, $request)
     {
-        if ($request->input('is_not_applicable')) {
-            $updateNotAp =  $subTask->update([
-                'is_not_applicable' => true
-            ]);
+        if ($request->input('applicable')) {
 
-            return $updateNotAp;
+            return $subTask->markAsApplicable();
         }
 
-        return $updateNotAp =  $subTask->update([
-            'is_not_applicable' => false
-        ]);
+        return $subTask->markAsNotApplicable();
     }
+
     protected function updateSubTaskStatus($subtask, $request)
     {
 
@@ -220,25 +216,25 @@ class ProjectSubTasksController extends Controller
                 }
             }
 
-
             $isCompleted = $subtask->markAsCompleted();
 
-            $this->moveTask($subtask->task->id);
+            $this->moveTask($subtask);
 
             return $isCompleted;
         }
 
-        $inCompleted = $subtask->markAsIncompleted();
-        $this->revertMovedTask($subtask->task->id);
-
-        return $inCompleted;
+        // $incompleteSubtask = $subtask->markAsInComplete();
+        $this->revertMovedTask($subtask);
+        // return $incompleteSubtask;
     }
 
-    protected function moveTask($task)
+    protected function moveTask($subtask)
     {
 
+        $subtask->markAsCompleted();
+
         // get task
-        $task = Task::with('column')->where('id', $task)->firstOrFail();
+        $task = Task::with('column')->where('id', $subtask->task->id)->firstOrFail();
 
         // list of subtask;
         $totalTaskSubTask = $task->subTasks()->count();
@@ -247,23 +243,35 @@ class ProjectSubTasksController extends Controller
         $completedSubTasks = $task->subTasks()->completed()->count();
 
         // Get the maximum column_id of the project's columns
-        $completedProjectColumnId = $task->column->project->columns->max('id') - 1; #completed column
+        $completedProjectColumnId = (int)$task->column->project->columns->max('id');
+        $pendingProjectColumnId = (int)$task->column->project->columns->min('id');
+        $progressProjectColumnId = $pendingProjectColumnId + 1;
+        $reviewProjectColumnId = $pendingProjectColumnId + 2;
+        $overdueProjectColumnId = $pendingProjectColumnId + 3;
+        $delayProjectColumnId = $pendingProjectColumnId + 4;
 
-        if ($completedSubTasks === $totalTaskSubTask && $task->column_id < $completedProjectColumnId) {
-            $task->update(['column_id' => $task->column_id + 1]);
-            $task->markAsCompleted();
-        }
+        // dd($completedProjectColumnId);
 
-        if ($completedSubTasks === 1) {
-            $task->update(['column_id' => $task->column_id + 1]);
+
+        if ($completedSubTasks < $totalTaskSubTask) {
+            $task->update(['column_id' => $progressProjectColumnId]);
+        } else if (
+            $completedSubTasks === $totalTaskSubTask &&
+            $task->column_id < $reviewProjectColumnId
+        ) {
+            $task->update(['column_id' => $reviewProjectColumnId, 'completed_at' => now(), 'is_approved' => 0]);
+            // $task->markAsCompleted();
+        } else if ($completedSubTasks === $totalTaskSubTask && !$task->is_approved) {
+            $task->update(['column_id' => $completedProjectColumnId, 'is_approved' => 1]);
         }
     }
 
 
-    protected function revertMovedTask($taskId)
+    protected function revertMovedTask($subtask)
     {
+
         // Get the task by ID
-        $task = Task::with('column')->where('id', $taskId)->firstOrFail();
+        $task = Task::with('column')->where('id', $subtask->task->id)->firstOrFail();
 
         // Count the total number of subtasks for the task
         $totalTaskSubTasks = $task->subTasks()->count();
@@ -273,19 +281,26 @@ class ProjectSubTasksController extends Controller
 
 
         // Get the maximum column_id of the project's columns
-        $completedProjectColumnId = $task->column->project->columns->max('id') - 1;
-        $minProjectColumnId = $task->column->project->columns->min('id');
-
-        // dd($completedProjectColumnId);
+        $completedProjectColumnId = (int)$task->column->project->columns->max('id');
+        $pendingProjectColumnId = (int)$task->column->project->columns->min('id');
+        $progressProjectColumnId = $pendingProjectColumnId + 1;
+        $reviewProjectColumnId = $pendingProjectColumnId + 2;
+        // dd($task->status);
 
         // move back to in-progress
-        if (!$task->isCompleted() && $task->column_id === $completedProjectColumnId && $totalTaskSubTasks === $completedSubTasks) {
-            $task->update(['column_id' => $task->column_id - 1, 'is_approved' => null]);
-            // $task->markAsInCompleted();
+        if ($task->status === 'completed') {
+            $task->markAsIncompleted();
         }
 
-        if ($completedSubTasks === 0) {
-            $task->update(['column_id' => $minProjectColumnId]);
+        if ($task->status === 'review') {
+
+            $task->markAsIncompleted();
         }
+
+        if ($task->status === 'ongoing' && $completedSubTasks <= 1) {
+            $task->update(['column_id' => $pendingProjectColumnId]);
+        }
+
+        return $subtask->markAsIncompleted();
     }
 }

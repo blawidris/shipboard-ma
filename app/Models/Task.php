@@ -183,19 +183,6 @@ class Task extends Model
         $query->whereNull('completed_at');
     }
 
-    /**
-     * Determine if the task is completed or not.
-     *
-     * @return bool
-     */
-    public function isCompleted()
-    {
-        $taskCompleted = $this->completed_at !== null;
-        $allCompletedSubTask = $this->subTasks()->where('completed_at', '<', now())->exists();
-        $isApprove = $this->is_approve ==  1;
-
-        return $taskCompleted && $allCompletedSubTask && $isApprove;
-    }
 
     /**
      * Determine if the task is completed or not.
@@ -276,7 +263,25 @@ class Task extends Model
     }
 
     /**
-     * Mark the task as approved.
+     * Mark the task as incompleted.
+     *
+     * @return boolean
+     */
+    public function markAsIncompleted()
+    {
+        if ($this->completed_at) {
+            $pendingTaskColumn = (int)$this->column->project->columns->min('id') ;
+
+            $processTaskColumn = $pendingTaskColumn + 1;
+
+            return tap($this->update(['completed_at' => null, 'is_approved' => null, 'column_id' =>  $processTaskColumn ]), function () {
+                event(new TaskStatusChanged($this));
+            });
+        }
+    }
+
+    /**
+     * Mark the task as unapproved.
      *
      * @return boolean
      */
@@ -289,22 +294,7 @@ class Task extends Model
         }
     }
 
-    /**
-     * Mark the task as incompleted.
-     *
-     * @return boolean
-     */
-    public function markAsIncompleted()
-    {
-        if ($this->completed_at) {
 
-            $this->subtasks()->whereNotNull('completed_at')->update(['completed_at' => null]);
-
-            return tap($this->update(['completed_at' => null, 'is_approved' => null, 'column_id' => ($this->column->project->columns->min('id'))]), function () {
-                event(new TaskStatusChanged($this));
-            });
-        }
-    }
 
     public function activities()
     {
@@ -319,8 +309,6 @@ class Task extends Model
 
         $subtasksNotCompleted = $this->subTasks()->where('completed_at', '<', now())->count() === 0;
 
-        // dd($subtasksNotCompleted);
-
         return $taskStartDateMissing && $taskDueDateMissing && $subtasksNotCompleted;
     }
 
@@ -328,57 +316,80 @@ class Task extends Model
     {
         $taskStartDateSet = $this->start_date !== null || $this->start_date == null;
         $taskDueDateSet = $this->due_date !== null || $this->due_date === null;
+        $totalTaskSubtask = $this->subTasks()->count();
 
-        $subtasksCompleted = $this->subTasks()->where('completed_at', '<', now())->count() > 0;
+        $totalSubtasksCompleted = $this->subTasks()->where('completed_at', '<', now())->count();
 
-        return $taskStartDateSet && $taskDueDateSet && $subtasksCompleted;
+        return $taskStartDateSet && $taskDueDateSet && $totalSubtasksCompleted < $totalTaskSubtask ;
     }
 
 
     public function isReview()
     {
-        $taskStartDateSet = $this->start_date !== null || $this->start_date == null;
-        $taskDueDateSet = $this->where('due_date', '<', now());
-        $taskApprove = $this->is_approve === 0;
 
-        $subtasksCompleted = $this->subTasks()->where('completed_at', '<', now())->count() > 0;
+        $taskApprove = $this->is_approved === 0;
+        $taskCompleted = $this->completed_at < now();
+        $totalTaskSubtask = $this->subTasks()->count();
 
-        return $taskStartDateSet && $taskDueDateSet && $subtasksCompleted && $taskApprove;
+        $totalSubtasksCompleted = $this->subTasks()->where('completed_at', '<', now())->count();
+
+        return $taskCompleted && $taskApprove && $totalSubtasksCompleted ===  $totalTaskSubtask;
     }
 
 
 
     public function isOverDue()
     {
-        $taskStartDateSet = $this->start_date !== null || $this->start_date == null;
+
+        $currentTime = now();
+
         $taskDueDateSet = $this->where('due_date', '<', now());
-        // $taskApprove = $this->is_approve === 0;
 
-        $subtasksCompleted = $this->subTasks()->where('completed_at', '<', now())->count() > 0;
+        $totalSubtasksCompleted = $this->subTasks()->where('completed_at', '<', now())->count();
 
-        return $taskStartDateSet && $taskDueDateSet && $subtasksCompleted;
+        $hasTaskDue = $currentTime > $taskDueDateSet;
+        $hasSubtasksCompleted = $totalSubtasksCompleted >= 0;
+
+        return $hasTaskDue && $hasSubtasksCompleted;
     }
 
-    public function getStatusAttribute($key)
+    /**
+     * Determine if the task is completed or not.
+     *
+     * @return bool
+     */
+    public function isCompleted()
     {
+        $taskApprove = $this->is_approved === 1;
+        $taskCompleted = $this->completed_at < now();
+        $totalTaskSubtask = $this->subTasks()->count();
 
+        $totalSubtasksCompleted = $this->subTasks()->where('completed_at', '<', now())->count();
 
+        return $taskCompleted && $taskApprove && $totalSubtasksCompleted === $totalTaskSubtask;
+    }
+
+    public function getStatusAttribute()
+    {
         if ($this->isNotStarted()) {
             return 'pending';
+        }
+
+        if ($this->isReview()) {
+            return 'review';
         }
 
         if ($this->isOngoing()) {
             return 'ongoing';
         }
 
-
         if ($this->isOverdue()) {
             return 'overdue';
         }
 
-        if ($this->isCompleted()) {
-
-            return 'completed';
-        }
+        return 'completed';
     }
+
+
+
 }

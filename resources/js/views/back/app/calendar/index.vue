@@ -25,12 +25,12 @@
                         <h1 class="text-lg font-semibold ml-3 sm:ml-0">{{ currentDate }}</h1>
                     </div>
 
-                    <div class="flex gap-x-3">
-                        <button button @click="calendar.changeView('dayGridDay')" class="btn btn-sm btn-white"
+                    <div class="flex gap-x-1">
+                        <button button @click="calendar.changeView('timeGridDay')" class="btn btn-sm btn-white"
                             type="button">
                             {{ $trans('labels.day') }}
                         </button>
-                        <button button @click="calendar.changeView('dayGridWeek')" class="btn btn-sm btn-white"
+                        <button button @click="calendar.changeView('timeGridWeek')" class="btn btn-sm btn-white"
                             type="button">
                             {{ $trans('labels.week') }}
                         </button>
@@ -38,6 +38,9 @@
                         <button button @click="calendar.changeView('dayGridMonth')" class="btn btn-sm btn-white"
                             type="button">
                             {{ $trans('labels.month') }}
+                        </button>
+                        <button button @click="calendar.changeView('listMonth')" class="btn btn-sm btn-white" type="button">
+                            {{ $trans('labels.list') }}
                         </button>
                     </div>
 
@@ -57,7 +60,7 @@
                 <v-full-calendar class="bg-white shadow-sm" :dates-render="onDatesRender" :display-event-time="true"
                     :editable="true" :events="$page.events" :header="false" :plugins="calendarPlugins"
                     @eventClick="onEventClick($event.event)" @eventDrop="onEventDrop($event.event)"
-                    default-view="dayGridMonth" height="parent" ref="calendar" :weekends="true" />
+                    default-view="dayGridMonth" height="parent" ref="calendar" :weekends="false" />
             </div>
         </template>
     </v-app-default-layout>
@@ -68,8 +71,11 @@ import VAppDefaultLayout from '@/views/back/app/layouts/default'
 import VFullCalendar from '@fullcalendar/vue'
 import interactionPlugin from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid'
+import timeGridPlugin from '@fullcalendar/timegrid'
+import listGridPlugin from '@fullcalendar/list'
 import VTaskModal from '@/views/back/app/tasks/modal-task'
 import VAlert from '@/components/alert'
+// import '@fullcalendar/interaction/main.css';
 
 export default {
     metaInfo() {
@@ -97,7 +103,8 @@ export default {
             defaultView: 'dayGridDay',
             currentDate: '',
             calendarPlugins: [
-                dayGridPlugin, interactionPlugin
+                dayGridPlugin, interactionPlugin,
+                timeGridPlugin, listGridPlugin
             ],
 
         }
@@ -111,18 +118,6 @@ export default {
 
     methods: {
 
-        switchView(view) {
-            const dView = {
-                month: 'dayGridMonth',
-                day: 'dayGridDay',
-                week: 'dayGridWeek'
-            };
-
-            this.defaultView = dView[view]
-
-            console.log(this.defaultView)
-        },
-
         onEventClick(event) {
             this.$modal(VTaskModal, {
                 users: this.users,
@@ -130,12 +125,12 @@ export default {
                 taskUuid: event.extendedProps.uuid,
                 content: event.title,
                 isCompleted: event.extendedProps.is_completed,
-                startDate: moment(event.start).format('YYYY-MM-DD'),
-                dueDate: moment(event.end).format('YYYY-MM-DD'),
+                startDate: moment(event.start).format('YYYY-MM-DD H:i'),
+                dueDate: moment(event.end).format('YYYY-MM-DD H:i'),
                 userUuid: event.extendedProps.user_uuid,
                 priority: event.extendedProps.priority
             });
-
+            console.log(event.start)
         },
         onEventDrop(event) {
             this.$inertia
@@ -144,12 +139,15 @@ export default {
                     task: event.extendedProps.uuid,
                 }), {
                     'content': event.title,
-                    'start_date': moment(event.start).format('YYYY-MM-DD'),
-                    'due_date': moment(event.end).format('YYYY-MM-DD'),
+                    'start': moment(event.start).format('YYYY-MM-DDTH:i:s'),
+                    'end': moment(event.end).format('YYYY-MM-DDTH:i:s'),
                     'is_completed': event.extendedProps.is_completed,
                     'user_uuid': event.extendedProps.user_uuid,
                     'priority': event.extendedProps.priority,
+                    allDay: false,
                 });
+
+
         },
         onDatesRender() {
             this.$nextTick(() => {
@@ -159,3 +157,11 @@ export default {
     }
 }
 </script>
+
+<style>
+.fc-day,
+.fc td {
+    padding: 5px 8px !important;
+    vertical-align: middle;
+}
+</style>

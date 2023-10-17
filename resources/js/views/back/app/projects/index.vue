@@ -9,7 +9,7 @@
                 <v-breadcrumb-item :lastItem="true" :title="$trans('headings.projects')" />
             </v-breadcrumb-layout>
 
-            
+
 
 
             <div class="container mx-auto flex flex-col flex-1 px-4 sm:px-6 md:px-8 py-4">
@@ -92,6 +92,18 @@
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <div class="mb-8 w-full flex justify-between items-center">
+                    <div class="inline-flex gap-x-3  ml-auto">
+                        <button class="px-1 py-0 5 flex items-center justify-center">
+                            list
+                        </button>
+                        <button class="px-1 py-0 5 flex items-center justify-center">
+                            kanban
+                        </button>
+                    </div>
+
                 </div>
 
                 <div class="overflow-hidden" v-if="$page.projects.data.length">

@@ -65,8 +65,10 @@
                 <v-draggable :data-column="column.uuid" class="flex flex-col flex-1" ghost-class="draggable-ghost"
                     group="tasks" v-model="column.tasks" v-bind="{ fallbackTolerance: 5 }"
                     @end="$emit('tasks-sort-change', $event)">
-                    <v-card-task :key="task.uuid" :task="task" @click="$emit('task-click', task)"
-                        v-for="task in column.tasks" />
+                    <div v-for="task in column.tasks" :key="task.uuid">
+                        <v-card-task :task="task" @click="$emit('task-click', task)" v-if="$page.project.stats.completed_subtasks > 0"/>
+                        <v-card-task :task="task" @click="$emit('task-click', task)" v-else=""/>
+                    </div>
                 </v-draggable>
             </div>
         </div>
@@ -98,7 +100,8 @@ export default {
             addTaskForm: new Form({
                 content: null,
                 visible: false
-            })
+            }),
+            allow:''
         }
     },
 

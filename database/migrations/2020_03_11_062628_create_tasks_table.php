@@ -18,7 +18,7 @@ class CreateTasksTable extends Migration
             $table->uuid('uuid')->unique();
             $table->string('content');
             $table->integer('index')->nullable()->unsigned();
-            $table->date('due_date')->nullable();
+            $table->timestamp('due_date')->nullable();
             $table->integer('priority')->unsigned()->nullable();
             $table->timestamps();
             $table->timestamp('completed_at')->nullable();

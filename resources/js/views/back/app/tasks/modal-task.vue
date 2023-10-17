@@ -5,6 +5,8 @@
                 <div>
                     <input type="checkbox" class="form-checkbox w-6 h-6 rounded-full text-green-400"
                         v-model="task.is_completed" @change="updateTask()" v-if="task.is_completed">
+
+                        {{ task.is_approved }}
                 </div>
 
                 <div class="pl-3 flex-1 flex items-center gap-x-2">
@@ -23,9 +25,9 @@
                         </span>
                         <span class="badge badge-red" v-else-if="status === 'overdue'">{{
                             $trans('labels.overdue') }}</span>
-                        <span class="badge badge-green" v-else-if="status === 'completed' && approved === '1'">{{
+                        <span class="badge badge-green" v-else-if="status === 'completed' && task.is_approved">{{
                             $trans('labels.completed') }}</span>
-                        <span class="badge badge-yellow" v-else-if="status === 'completed' && approved !== '1'">{{
+                        <span class="badge badge-yellow" v-else-if="status === 'completed' && !task.is_approved">{{
                             $trans('labels.pending') }}
                         </span>
                     </div>
@@ -55,7 +57,7 @@
                                 </a>
 
                                 <a @click.prevent="showApproveTaskModal()" href="#" class="dropdown-item"
-                                    v-if="task.is_approved === '1'">
+                                    v-if="$task.is_completed && task.is_approved">
                                     {{ $trans('labels.unapprove') }}
                                 </a>
                             </div>
@@ -90,7 +92,7 @@
 
                     <template v-slot:content>
                         <!-- <v-input-date inline v-model="task.start_date" @input="updateTask()" /> -->
-                        <v-input-date inline v-model="task.start_date" @input="updateTask()" />
+                        <v-input-date inline v-model="task.start_date" @input="updateTask()" :enableTime="true" />
                     </template>
                 </v-dropdown>
 
@@ -109,7 +111,7 @@
 
                     <template v-slot:content>
                         <!-- <v-input-date inline v-model="task.start_date" @input="updateTask()" /> -->
-                        <v-input-date inline v-model="task.due_date" @input="updateTask()" />
+                        <v-input-date inline v-model="task.due_date" @input="updateTask()" :enableTime="true" />
                     </template>
                 </v-dropdown>
 
@@ -130,9 +132,10 @@
 
                     <span class="badge badge-red" v-else-if="status === 'overdue'">{{
                         $trans('labels.overdue') }}</span>
-                    <span class="badge badge-green" v-else-if="status === 'completed' && approved === '1'">{{
+                    <span class="badge badge-green" v-else-if="status === 'completed' && task.is_approved">{{
                         $trans('labels.completed') }}</span>
-                    <span class="badge badge-yellow" v-else-if="status === 'completed' && approved !== '1'">{{
+
+                    <span class="badge badge-yellow" v-else-if="status === 'completed' && !task.is_approved">{{
                         $trans('labels.pending') }}
                     </span>
                 </div>
@@ -212,7 +215,8 @@ export default {
         },
         isCompleted: {
             type: Boolean,
-            default: false
+            default: false,
+            required: true
         },
         userUuid: {
             type: String,
@@ -230,13 +234,17 @@ export default {
             type: String,
             default: null
         },
-        is_not_applicable: {
+        applicable: {
             type: Boolean,
             default: false
         },
         startDate: {
             type: String,
             default: null
+        },
+        isApproved: {
+            type: Boolean,
+            default: false
         }
     },
 
@@ -258,6 +266,7 @@ export default {
     methods: {
         show() {
             this.$refs.modal.show();
+            // console.log(this.task.is_completed)
         },
 
         hide() {

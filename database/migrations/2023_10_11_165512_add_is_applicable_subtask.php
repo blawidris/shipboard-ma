@@ -14,7 +14,7 @@ class AddIsApplicableSubtask extends Migration
     public function up()
     {
         Schema::table('subtasks', function (Blueprint $table) {
-            $table->boolean('is_not_applicalbe')->default(0);
+            $table->boolean('applicalbe')->default(1);
         });
     }
 
@@ -26,7 +26,7 @@ class AddIsApplicableSubtask extends Migration
     public function down()
     {
         Schema::table('subtasks', function (Blueprint $table) {
-            $table->boolean('is_not_applicable');
+            $table->boolean('applicable');
         });
     }
 }

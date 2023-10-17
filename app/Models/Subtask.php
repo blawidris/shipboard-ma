@@ -92,6 +92,30 @@ class Subtask extends Model
     }
 
     /**
+     * Mark the task as applicable.
+     *
+     * @return boolean
+     */
+    public function markAsApplicable()
+    {
+        if ($this->applicable) {
+            return $this->update(['applicable' => true]);
+        }
+    }
+
+    /**
+     * Mark the task as not applicable.
+     *
+     * @return boolean
+     */
+    public function markAsNotApplicable()
+    {
+        if ($this->applicable) {
+            $this->update(['applicable' => false]);
+        }
+    }
+
+    /**
      * Filter completed subtasks.
      *
      * @param $query
@@ -116,11 +140,23 @@ class Subtask extends Model
         return $this->completed_at !== null;
     }
 
+    /**
+     * Determine if the task is completed or not.
+     *
+     * @return bool
+     */
+    public function isApplicable()
+    {
+        return $this->applicable === 0;
+    }
+
+    public function isNotApplicable()
+    {
+        return $this->applicable === 0;
+    }
 
     public function activities()
     {
         return $this->hasMany(Activity::class);
     }
-
-    
 }
